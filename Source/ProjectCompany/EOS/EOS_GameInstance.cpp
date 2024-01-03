@@ -104,14 +104,14 @@ void UEOS_GameInstance::OnFindSessionCompleted(bool bWasSuccessful)
                 }
                 else
                 {
-                    CreateEOSSession(false, false, 4);
+                    // CreateEOSSession(false, false, 4);
                 }
             }
         }
     }
     else
     {
-        CreateEOSSession(false, false, 4);
+        // CreateEOSSession(false, false, 4);
     }
 }
 
