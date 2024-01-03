@@ -175,9 +175,9 @@ void UEOS_GameInstance::FindSessionAndJoin()
         if (SessionPtrRef)
         {
             SessionSearch = MakeShareable(new FOnlineSessionSearch());
-            SessionSearch->bIsLanQuery = false;
-            SessionSearch->QuerySettings.SearchParams.Empty();
-            SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, false, EOnlineComparisonOp::Equals);
+            //SessionSearch->bIsLanQuery = false;
+            //SessionSearch->QuerySettings.SearchParams.Empty();
+            //SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, false, EOnlineComparisonOp::Equals);
             SessionSearch->MaxSearchResults = 20;
             SessionPtrRef->OnFindSessionsCompleteDelegates.AddUObject(this, &UEOS_GameInstance::OnFindSessionCompleted);
             SessionPtrRef->FindSessions(0, SessionSearch.ToSharedRef());
