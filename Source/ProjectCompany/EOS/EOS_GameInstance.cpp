@@ -104,6 +104,7 @@ void UEOS_GameInstance::OnFindSessionCompleted(bool bWasSuccessful)
                 }
                 else
                 {
+                    UE_LOG(LogTemp, Error, TEXT("0 SearchResults"));
                     // CreateEOSSession(false, false, 4);
                 }
             }
@@ -111,6 +112,7 @@ void UEOS_GameInstance::OnFindSessionCompleted(bool bWasSuccessful)
     }
     else
     {
+        UE_LOG(LogTemp, Error, TEXT("Unable to find session"));
         // CreateEOSSession(false, false, 4);
     }
 }
