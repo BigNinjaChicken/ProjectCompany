@@ -14,7 +14,6 @@ void UCombatComponent::BeginPlay()
 
     // Initialize Health
     Health = MaxHealth;
-
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
