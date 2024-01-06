@@ -3,8 +3,13 @@
 
 #include "GenerateLevelActor.h"
 #include "TileActor.h"
-#include "Engine/LevelStreamingDynamic.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
+#include "LevelInstance/LevelInstanceLevelStreaming.h"
+// Include necessary headers
+#include "Engine/LevelStreamingDynamic.h"
+#include "Engine/World.h"
+#include "Engine/Engine.h"
 
 // Sets default values
 AGenerateLevelActor::AGenerateLevelActor()
@@ -30,8 +35,6 @@ void AGenerateLevelActor::BeginPlay()
 void AGenerateLevelActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// DOREPLIFETIME(AGenerateLevelActor, DynamicLevel);
 }
 
 void AGenerateLevelActor::ServerOnBeginGenerateLevel_Implementation()
@@ -95,19 +98,22 @@ void AGenerateLevelActor::MulticastOnBeginGenerateLevel_Implementation()
 // Function to load a level into the current level at a specified position and rotation
 void AGenerateLevelActor::MulticastLoadLevelAtPosition_Implementation(UWorld* World, const TSoftObjectPtr<UWorld>& MapAsset, const FVector& Position, const FRotator& Rotation)
 {
-    if (!MapAsset.IsNull())
-    {
-        FString MapPath = MapAsset.GetLongPackageName();
-        bool bOutSuccess;
-		FString LevelName = "LevelTile" + FString::FromInt(LevelNameIndex);
-		LevelNameIndex++;
-		DynamicLevel = ULevelStreamingDynamic::LoadLevelInstance(World, MapPath, Position, Rotation, bOutSuccess, LevelName);
-        if (DynamicLevel != nullptr)
-        {
-            DynamicLevel->SetShouldBeLoaded(true);
-            DynamicLevel->SetShouldBeVisible(true);
-        }
-    }
+	if (MapAsset.IsNull())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MapAsset is null"));
+	}
+	
+	FString MapPath = MapAsset.GetLongPackageName();
+	bool bOutSuccess;
+	FString LevelName = "LevelTile" + FString::FromInt(LevelNameIndex);
+	LevelNameIndex++;
+	DynamicLevel = ULevelStreamingDynamic::LoadLevelInstance(World, MapPath, Position, Rotation, bOutSuccess, LevelName, LevelStreamingClass);
+	GetWorld()->UpdateLevelStreaming();
+	if (!bOutSuccess)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Level loading failed for: %s"), *MapPath);
+	}
+
 }
 
 // Called every frame

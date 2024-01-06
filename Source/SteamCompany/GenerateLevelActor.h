@@ -76,4 +76,7 @@ public:
 	int32 LevelNameIndex = 0;
 
 	ULevelStreamingDynamic* DynamicLevel;
+
+	UPROPERTY(EditAnywhere, Category = "Grid")
+	TSubclassOf<ULevelStreamingDynamic> LevelStreamingClass;
 };
