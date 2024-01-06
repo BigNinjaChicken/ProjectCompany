@@ -25,14 +25,10 @@ protected:
 	// Replication setup
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
-	UFUNCTION(Server, Reliable)
-    void ServerOnBeginGenerateLevel();
-
-    UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
     void MulticastOnBeginGenerateLevel();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastLoadLevelAtPosition(UWorld* World, const TSoftObjectPtr<UWorld>& MapAsset, const FVector& Position, const FRotator& Rotation);
+	void LoadLevelAtPosition(UWorld* World, const TSoftObjectPtr<UWorld>& MapAsset, const FVector& Position, const FRotator& Rotation);
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -42,41 +38,43 @@ public:
 	void GenerateGrid();
 
 	// Grid dimensions
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	int32 GridSizeX;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	int32 GridSizeY;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	float GridSpacing;
 
 	// SubActor class to use for components
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TSubclassOf<AActor> SubActorClass;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> StraightLevels;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> CornerLevels;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> FourWayIntersectionLevels;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> ThreeWayIntersectionLevels;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> EndCapLevels;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	float ScaleFactor = 100.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	int32 LevelNameIndex = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	ULevelStreamingDynamic* DynamicLevel;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TSubclassOf<ULevelStreamingDynamic> LevelStreamingClass;
 };

@@ -6,10 +6,11 @@
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "LevelInstance/LevelInstanceLevelStreaming.h"
-// Include necessary headers
 #include "Engine/LevelStreamingDynamic.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
+#include "LevelInstance/LevelInstanceActor.h"
+#include "GameFramework/PlayerController.h"
 
 // Sets default values
 AGenerateLevelActor::AGenerateLevelActor()
@@ -26,20 +27,12 @@ void AGenerateLevelActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority())
-	{
-		ServerOnBeginGenerateLevel();
-	}
+	MulticastOnBeginGenerateLevel();
 }
 
 void AGenerateLevelActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-}
-
-void AGenerateLevelActor::ServerOnBeginGenerateLevel_Implementation()
-{
-	MulticastOnBeginGenerateLevel();
 }
 
 void AGenerateLevelActor::MulticastOnBeginGenerateLevel_Implementation()
@@ -66,27 +59,27 @@ void AGenerateLevelActor::MulticastOnBeginGenerateLevel_Implementation()
 		case ETileShape::Straight:
 			// Handle Straight logic
 			LevelIndex = FMath::RandRange(0, StraightLevels.Num() - 1);
-			MulticastLoadLevelAtPosition(World, StraightLevels[LevelIndex], Position, Rotation);
+			LoadLevelAtPosition(World, StraightLevels[LevelIndex], Position, Rotation);
 			break;
 		case ETileShape::Corner:
 			// Handle Corner logic
 			LevelIndex = FMath::RandRange(0, CornerLevels.Num() - 1);
-			MulticastLoadLevelAtPosition(World, CornerLevels[LevelIndex], Position, Rotation);
+			LoadLevelAtPosition(World, CornerLevels[LevelIndex], Position, Rotation);
 			break;
 		case ETileShape::ThreeWayIntersection:
 			// Handle ThreeWayIntersection logic
 			LevelIndex = FMath::RandRange(0, ThreeWayIntersectionLevels.Num() - 1);
-			MulticastLoadLevelAtPosition(World, ThreeWayIntersectionLevels[LevelIndex], Position, Rotation);
+			LoadLevelAtPosition(World, ThreeWayIntersectionLevels[LevelIndex], Position, Rotation);
 			break;
 		case ETileShape::FourWayIntersection:
 			// Handle FourWayIntersection logic
 			LevelIndex = FMath::RandRange(0, FourWayIntersectionLevels.Num() - 1);
-			MulticastLoadLevelAtPosition(World, FourWayIntersectionLevels[LevelIndex], Position, Rotation);
+			LoadLevelAtPosition(World, FourWayIntersectionLevels[LevelIndex], Position, Rotation);
 			break;
 		case ETileShape::EndCap:;
 			// Handle EndCap logic
 			LevelIndex = FMath::RandRange(0, EndCapLevels.Num() - 1);
-			MulticastLoadLevelAtPosition(World, EndCapLevels[LevelIndex], Position, Rotation);
+			LoadLevelAtPosition(World, EndCapLevels[LevelIndex], Position, Rotation);
 			break;
 		default:
 			// Handle default case
@@ -96,7 +89,7 @@ void AGenerateLevelActor::MulticastOnBeginGenerateLevel_Implementation()
 }
 
 // Function to load a level into the current level at a specified position and rotation
-void AGenerateLevelActor::MulticastLoadLevelAtPosition_Implementation(UWorld* World, const TSoftObjectPtr<UWorld>& MapAsset, const FVector& Position, const FRotator& Rotation)
+void AGenerateLevelActor::LoadLevelAtPosition(UWorld* World, const TSoftObjectPtr<UWorld>& MapAsset, const FVector& Position, const FRotator& Rotation)
 {
 	if (MapAsset.IsNull())
 	{
@@ -108,12 +101,11 @@ void AGenerateLevelActor::MulticastLoadLevelAtPosition_Implementation(UWorld* Wo
 	FString LevelName = "LevelTile" + FString::FromInt(LevelNameIndex);
 	LevelNameIndex++;
 	DynamicLevel = ULevelStreamingDynamic::LoadLevelInstance(World, MapPath, Position, Rotation, bOutSuccess, LevelName, LevelStreamingClass);
-	GetWorld()->UpdateLevelStreaming();
+
 	if (!bOutSuccess)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Level loading failed for: %s"), *MapPath);
 	}
-
 }
 
 // Called every frame
