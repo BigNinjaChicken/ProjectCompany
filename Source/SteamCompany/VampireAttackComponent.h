@@ -6,13 +6,13 @@
 #include "Net/UnrealNetwork.h"
 #include "VampireAttackComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBiteDamageComplete);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBiteDamageComplete, UCombatComponent*, OtherCombatComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBiteCooldownBegin, float, BiteCooldown);
 
 class UInputMappingContext;
 class UInputAction;
 
-UCLASS(config=Game, BlueprintType, meta=(ShortTooltip="Vampire Attack Component."))
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STEAMCOMPANY_API UVampireAttackComponent : public UActorComponent
 {
     GENERATED_BODY()
@@ -60,6 +60,10 @@ public:
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnBiteCooldownBegin OnBiteCooldownBegin;
+
+    void CooldownComplete();
+
+    bool bOnCooldown = false;
 
     UFUNCTION(Server, Reliable)
     void ServerRequestDamage(UCombatComponent* OtherCombatComp, float DamageAmount);
