@@ -55,12 +55,22 @@ void UVampireAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType
     // Vampire attack logic that uses CombatComp...
 }
 
+void UVampireAttackComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(UVampireAttackComponent, OnBiteDamageComplete);
+    DOREPLIFETIME(UVampireAttackComponent, OnBiteCooldownBegin);
+}
+
 void UVampireAttackComponent::Bite()
 {
     if (!Character)
     {
         return;
     }
+
+    OnBiteCooldownBegin.Broadcast(BiteCooldown);
 
     FVector BiteLocation = Character->GetActorLocation(); // You might want to adjust this location
     float BiteRadius = 300.0f; // Set the radius for the bite sphere
@@ -87,15 +97,24 @@ void UVampireAttackComponent::Bite()
     DrawDebugSphere(GetWorld(), BiteLocation, BiteRadius, 32, FColor::Red, false, 2.0f);
 #endif
 
+    bool bBiteSuccessful = false;
     if (bOverlap)
     {
         for (AActor* OtherActor : OverlappedActors)
         {
             UCombatComponent* OtherCombatComp = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
             if (OtherCombatComp) {
-                ServerRequestDamage(OtherCombatComp, 10.0f);
+                // Disables friendly fire
+                if (!OtherCombatComp->bIsFriendly) {
+                    ServerRequestDamage(OtherCombatComp, 10.0f);
+                    bBiteSuccessful = true;
+                }
             }
         }
+    }
+
+    if (bBiteSuccessful) {
+        OnBiteDamageComplete.Broadcast();
     }
 }
 

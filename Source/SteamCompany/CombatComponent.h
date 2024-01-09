@@ -31,9 +31,11 @@ public:
     // Health Properties
     UPROPERTY(BlueprintReadOnly, Category = "Health", Replicated)
     float Health;
-
     UPROPERTY(EditAnywhere, Category = "Health")
     float MaxHealth = 100.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+    bool bIsFriendly = false;
 
     // Delegate for damage events
     UPROPERTY(BlueprintAssignable, Category = "Events")
@@ -44,6 +46,6 @@ public:
     FOnActorDead OnActorDead;
 
     // Function to handle damage
-    UFUNCTION(Server, Reliable)
+    UFUNCTION(Server, Reliable, BlueprintCallable)
     void ServerTakeDamage(float DamageAmount);
 };
