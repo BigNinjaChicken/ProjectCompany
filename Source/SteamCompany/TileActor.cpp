@@ -16,6 +16,8 @@ ATileActor::ATileActor()
 	SetRootComponent(Root);
 	TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TileMesh"));
 	TileMesh->SetupAttachment(Root);
+	ChurchMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ChurchMesh"));
+	ChurchMesh->SetupAttachment(TileMesh);
 	ForwardArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("ForwardArrow"));
 	ForwardArrow->SetupAttachment(TileMesh);
 	LeftArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("LeftArrow"));
@@ -48,6 +50,10 @@ void ATileActor::OnTileShapeChanged()
 	BackwardArrow->SetVisibility(true);
 	LeftArrow->SetVisibility(true);
 	RightArrow->SetVisibility(true);
+	ChurchMesh->SetVisibility(false);
+
+	if (bIsChurch) ChurchMesh->SetVisibility(true);
+
 	switch (TileShape)
 	{
 	case ETileShape::Straight:

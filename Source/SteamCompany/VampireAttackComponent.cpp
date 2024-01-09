@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/TimerHandle.h"
 
 UVampireAttackComponent::UVampireAttackComponent()
 {
@@ -65,12 +66,19 @@ void UVampireAttackComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProper
 
 void UVampireAttackComponent::Bite()
 {
+    if (bOnCooldown) {
+        return;
+    }
+
     if (!Character)
     {
         return;
     }
 
     OnBiteCooldownBegin.Broadcast(BiteCooldown);
+    bOnCooldown = true;
+    FTimerHandle CooldownTimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &UVampireAttackComponent::CooldownComplete, BiteCooldown, false);
 
     FVector BiteLocation = Character->GetActorLocation(); // You might want to adjust this location
     float BiteRadius = 300.0f; // Set the radius for the bite sphere
@@ -97,25 +105,26 @@ void UVampireAttackComponent::Bite()
     DrawDebugSphere(GetWorld(), BiteLocation, BiteRadius, 32, FColor::Red, false, 2.0f);
 #endif
 
-    bool bBiteSuccessful = false;
+    UCombatComponent* OtherCombatComp = nullptr;
     if (bOverlap)
     {
         for (AActor* OtherActor : OverlappedActors)
         {
-            UCombatComponent* OtherCombatComp = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
+            OtherCombatComp = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
             if (OtherCombatComp) {
                 // Disables friendly fire
                 if (!OtherCombatComp->bIsFriendly) {
                     ServerRequestDamage(OtherCombatComp, 10.0f);
-                    bBiteSuccessful = true;
+                    OnBiteDamageComplete.Broadcast(OtherCombatComp);
                 }
             }
         }
     }
+}
 
-    if (bBiteSuccessful) {
-        OnBiteDamageComplete.Broadcast();
-    }
+void UVampireAttackComponent::CooldownComplete()
+{
+    bOnCooldown = false;
 }
 
 void UVampireAttackComponent::ServerRequestDamage_Implementation(UCombatComponent* OtherCombatComp, float DamageAmount)

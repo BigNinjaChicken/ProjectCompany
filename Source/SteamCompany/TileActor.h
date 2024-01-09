@@ -16,8 +16,7 @@ enum class ETileShape : uint8
     Corner,
     ThreeWayIntersection,
 	FourWayIntersection,
-	EndCap,
-	Church
+	EndCap
 };
 
 UCLASS()
@@ -44,6 +43,9 @@ public:
 	UStaticMeshComponent* TileMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* ChurchMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UArrowComponent* ForwardArrow;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -57,6 +59,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ETileShape TileShape;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsChurch = false;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

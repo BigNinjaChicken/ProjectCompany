@@ -66,6 +66,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> EndCapLevels;
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	TArray<TSoftObjectPtr<UWorld>> ChurchStraightLevels;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	TArray<TSoftObjectPtr<UWorld>> ChurchCornerLevels;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	TArray<TSoftObjectPtr<UWorld>> ChurchFourWayIntersectionLevels;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	TArray<TSoftObjectPtr<UWorld>> ChurchThreeWayIntersectionLevels;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	TArray<TSoftObjectPtr<UWorld>> ChurchEndCapLevels;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	float ScaleFactor = 100.0f;
 

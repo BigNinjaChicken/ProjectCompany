@@ -58,28 +58,57 @@ void AGenerateLevelActor::MulticastOnBeginGenerateLevel_Implementation()
 		{
 		case ETileShape::Straight:
 			// Handle Straight logic
-			LevelIndex = FMath::RandRange(0, StraightLevels.Num() - 1);
-			LoadLevelAtPosition(World, StraightLevels[LevelIndex], Position, Rotation);
+			if (TileActor->bIsChurch) {
+				LevelIndex = FMath::RandRange(0, ChurchStraightLevels.Num() - 1);
+				LoadLevelAtPosition(World, ChurchStraightLevels[LevelIndex], Position, Rotation);
+			}
+			else {
+				LevelIndex = FMath::RandRange(0, StraightLevels.Num() - 1);
+				LoadLevelAtPosition(World, StraightLevels[LevelIndex], Position, Rotation);
+			}
 			break;
 		case ETileShape::Corner:
 			// Handle Corner logic
-			LevelIndex = FMath::RandRange(0, CornerLevels.Num() - 1);
-			LoadLevelAtPosition(World, CornerLevels[LevelIndex], Position, Rotation);
+			if (TileActor->bIsChurch) {
+				LevelIndex = FMath::RandRange(0, ChurchCornerLevels.Num() - 1);
+				LoadLevelAtPosition(World, ChurchCornerLevels[LevelIndex], Position, Rotation);
+			}
+			else {
+				LevelIndex = FMath::RandRange(0, CornerLevels.Num() - 1);
+				LoadLevelAtPosition(World, CornerLevels[LevelIndex], Position, Rotation);
+			}
 			break;
 		case ETileShape::ThreeWayIntersection:
-			// Handle ThreeWayIntersection logic
-			LevelIndex = FMath::RandRange(0, ThreeWayIntersectionLevels.Num() - 1);
-			LoadLevelAtPosition(World, ThreeWayIntersectionLevels[LevelIndex], Position, Rotation);
+			if (TileActor->bIsChurch) {
+				LevelIndex = FMath::RandRange(0, ChurchThreeWayIntersectionLevels.Num() - 1);
+				LoadLevelAtPosition(World, ChurchThreeWayIntersectionLevels[LevelIndex], Position, Rotation);
+			}
+			else {
+				LevelIndex = FMath::RandRange(0, ThreeWayIntersectionLevels.Num() - 1);
+				LoadLevelAtPosition(World, ThreeWayIntersectionLevels[LevelIndex], Position, Rotation);
+			}
 			break;
 		case ETileShape::FourWayIntersection:
 			// Handle FourWayIntersection logic
-			LevelIndex = FMath::RandRange(0, FourWayIntersectionLevels.Num() - 1);
-			LoadLevelAtPosition(World, FourWayIntersectionLevels[LevelIndex], Position, Rotation);
+			if (TileActor->bIsChurch) {
+				LevelIndex = FMath::RandRange(0, ChurchFourWayIntersectionLevels.Num() - 1);
+				LoadLevelAtPosition(World, ChurchFourWayIntersectionLevels[LevelIndex], Position, Rotation);
+			}
+			else {
+				LevelIndex = FMath::RandRange(0, FourWayIntersectionLevels.Num() - 1);
+				LoadLevelAtPosition(World, FourWayIntersectionLevels[LevelIndex], Position, Rotation);
+			}
 			break;
 		case ETileShape::EndCap:;
 			// Handle EndCap logic
-			LevelIndex = FMath::RandRange(0, EndCapLevels.Num() - 1);
-			LoadLevelAtPosition(World, EndCapLevels[LevelIndex], Position, Rotation);
+			if (TileActor->bIsChurch) {
+				LevelIndex = FMath::RandRange(0, ChurchEndCapLevels.Num() - 1);
+				LoadLevelAtPosition(World, ChurchEndCapLevels[LevelIndex], Position, Rotation);
+			}
+			else {
+				LevelIndex = FMath::RandRange(0, EndCapLevels.Num() - 1);
+				LoadLevelAtPosition(World, EndCapLevels[LevelIndex], Position, Rotation);
+			}
 			break;
 		default:
 			// Handle default case
