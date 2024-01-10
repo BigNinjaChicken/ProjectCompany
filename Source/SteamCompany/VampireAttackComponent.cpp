@@ -114,7 +114,7 @@ void UVampireAttackComponent::Bite()
             if (OtherCombatComp) {
                 // Disables friendly fire
                 if (!OtherCombatComp->bIsFriendly) {
-                    ServerRequestDamage(OtherCombatComp, 10.0f);
+                    ServerRequestDamage(OtherCombatComp, Damage * CombatComp->StrengthMultiplier);
                     OnBiteDamageComplete.Broadcast(OtherCombatComp);
                 }
             }

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Logging/LogMacros.h"
 #include "SteamCompanyCharacter.generated.h"
 
 class UInputComponent;
@@ -13,8 +12,6 @@ class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
-
-DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
 class ASteamCompanyCharacter : public ACharacter

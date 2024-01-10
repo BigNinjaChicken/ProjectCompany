@@ -8,6 +8,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTakeDamageComplete);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActorDead);
 
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STEAMCOMPANY_API UCombatComponent : public UActorComponent
 {
@@ -31,6 +32,7 @@ public:
     // Health Properties
     UPROPERTY(BlueprintReadOnly, Category = "Health", Replicated)
     float Health;
+
     UPROPERTY(EditAnywhere, Category = "Health")
     float MaxHealth = 100.0f;
 
@@ -48,4 +50,6 @@ public:
     // Function to handle damage
     UFUNCTION(Server, Reliable, BlueprintCallable)
     void ServerTakeDamage(float DamageAmount);
+
+    float StrengthMultiplier = 1.0f;
 };
