@@ -43,7 +43,7 @@ void AItemPickupActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, 
 	}
 
 	UCombatComponent* OtherCombatComponent = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
-	if (!OtherCombatComponent->bIsFriendly) {
+	if (!OtherCombatComponent->bIsPlayer) {
 		return;
 	}
 

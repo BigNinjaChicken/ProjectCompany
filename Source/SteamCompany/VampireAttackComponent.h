@@ -55,10 +55,13 @@ public:
     float BiteCooldown = 2.0f;
 
     // Delegate for damage events
-    UPROPERTY(BlueprintAssignable, Category = "Events")
+    UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
     FOnBiteDamageComplete OnBiteDamageComplete;
 
-    UPROPERTY(BlueprintAssignable, Category = "Events")
+    UPROPERTY(Replicated)
+    UCombatComponent* OtherCombatComponent;
+
+    UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
     FOnBiteCooldownBegin OnBiteCooldownBegin;
 
     void CooldownComplete();
@@ -70,4 +73,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     float Damage = 10.0f;
+
+    UFUNCTION()
+    void OnRep_BiteDamageComplete() {}
 };
