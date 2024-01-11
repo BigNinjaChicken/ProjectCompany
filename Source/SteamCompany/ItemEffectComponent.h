@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Engine/Texture2D.h"
 #include "ItemEffectComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STEAMCOMPANY_API UItemEffectComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -25,7 +26,11 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// How many of the item the player has
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 ItemCount = 1;
 
 	virtual void UpdateStats(int32 ChangeInItemAmount);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UTexture2D* ItemIconTexture;
 };

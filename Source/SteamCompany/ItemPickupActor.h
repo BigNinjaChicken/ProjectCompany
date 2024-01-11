@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Components/MeshComponent.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Components/CapsuleComponent.h"
+#include "Components/MeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "ItemEffectComponent.h"
 #include "ItemPickupActor.generated.h"
 
