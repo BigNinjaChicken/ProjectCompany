@@ -28,6 +28,10 @@
 		{
 			"Name": "VoiceChat",
 			"Enabled": false
+		},
+		{
+			"Name": "SkeletalMeshModelingTools",
+			"Enabled": true
 		}
 	]
 }
