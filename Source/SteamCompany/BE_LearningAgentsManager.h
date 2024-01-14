@@ -3,27 +3,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "BasicAICharacter.generated.h"
+#include "LearningAgentsManager.h"
+#include "BE_LearningAgentsManager.generated.h"
 
+/**
+ * 
+ */
 UCLASS()
-class STEAMCOMPANY_API ABasicAICharacter : public ACharacter
+class STEAMCOMPANY_API ABE_LearningAgentsManager : public ALearningAgentsManager
 {
 	GENERATED_BODY()
-
+	
 public:
 	// Sets default values for this character's properties
-	ABasicAICharacter();
+	ABE_LearningAgentsManager();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };
