@@ -33,10 +33,6 @@
 		{
 			"Name": "SkeletalMeshModelingTools",
 			"Enabled": true
-		},
-		{
-			"Name": "LearningAgents",
-			"Enabled": true
 		}
 	]
 }
