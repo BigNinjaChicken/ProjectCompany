@@ -22,6 +22,7 @@ void UVampireAttackComponent::BeginPlay()
     {
         // Handle the case where no CombatComponent is found
         UE_LOG(LogTemp, Warning, TEXT("VampireAttackComponent requires a CombatComponent on the same actor!"));
+        return;
     }
 
     // Attempt to find Owner Character
@@ -30,6 +31,7 @@ void UVampireAttackComponent::BeginPlay()
     {
         // Handle the case where no CombatComponent is found
         UE_LOG(LogTemp, Warning, TEXT("Owner is not ACharacter"));
+        return;
     }
 
 	// Set up action bindings

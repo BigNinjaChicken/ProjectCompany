@@ -9,6 +9,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/SphereComponent.h"
+#include "PlayerInteractableObjComponent.h"
 
 // Sets default values
 AStartChurchEventActor::AStartChurchEventActor()
@@ -28,21 +29,11 @@ AStartChurchEventActor::AStartChurchEventActor()
 void AStartChurchEventActor::BeginPlay()
 {
 	Super::BeginPlay();
-    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    UPlayerInteractableObjComponent* PlayerInteractableObjComponent = Cast<UPlayerInteractableObjComponent>(GetComponentByClass(UPlayerInteractableObjComponent::StaticClass()));
+    if (PlayerInteractableObjComponent)
     {
-        APlayerController* PlayerController = It->Get();
-        if (PlayerController)
-        {
-            ACharacter* PlayerCharacter = Cast<ACharacter>(PlayerController->GetPawn());
-            if (PlayerCharacter)
-            {
-                UPlayerInteractComponent* InteractComponent = PlayerCharacter->FindComponentByClass<UPlayerInteractComponent>();
-                if (InteractComponent)
-                {
-                    InteractComponent->OnInteract.AddDynamic(this, &AStartChurchEventActor::OnInteractHandler);
-                }
-            }
-        }
+        // Bind to the FOnActorDead delegate
+        PlayerInteractableObjComponent->OnInteract.AddDynamic(this, &AStartChurchEventActor::OnInteractHandler);
     }
 
     InteractableWidgetComponent->SetHiddenInGame(true);

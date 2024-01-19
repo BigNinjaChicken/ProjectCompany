@@ -37,21 +37,22 @@ void AItemPickupActor::Tick(float DeltaTime)
 
 void AItemPickupActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!OtherActor)
-	{
-		return;
-	}
+    if (!OtherActor)
+    {
+        return;
+    }
 
-	UCombatComponent* OtherCombatComponent = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
-	if (!OtherCombatComponent->bIsPlayer) {
-		return;
-	}
+    UCombatComponent* OtherCombatComponent = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
+    if (!OtherCombatComponent || !OtherCombatComponent->bIsPlayer)
+    {
+        return;
+    }
 
-	UItemStackComponent* ItemStackComponent = Cast<UItemStackComponent>(OtherActor->GetComponentByClass(UItemStackComponent::StaticClass()));
-	if (ItemStackComponent)
-	{
-		ItemStackComponent->AddItemEffect(ItemType);
-	}
-	
-	Destroy();
+    UItemStackComponent* ItemStackComponent = Cast<UItemStackComponent>(OtherActor->GetComponentByClass(UItemStackComponent::StaticClass()));
+    if (ItemStackComponent)
+    {
+        ItemStackComponent->AddItemEffect(ItemType);
+    }
+
+    Destroy();
 }

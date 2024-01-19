@@ -52,8 +52,5 @@ public:
 	UWidgetComponent* InteractableWidgetComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
-	TSubclassOf<ACharacter> BossCharacter;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
 	ABossEventActor* BossEventActor;
 };

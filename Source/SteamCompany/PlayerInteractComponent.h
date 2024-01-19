@@ -6,9 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "PlayerInteractComponent.generated.h"
 
-// Delegate declaration
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, FHitResult, InteractedActor);
-
 class UInputMappingContext;
 class UInputAction;
 
@@ -47,8 +44,4 @@ public:
 	/** Raycast distance */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	float RaycastDistance = 1000.0f;
-
-	/** Interaction delegate */
-	UPROPERTY(BlueprintAssignable, Category = "Interaction")
-	FOnInteract OnInteract;
 };

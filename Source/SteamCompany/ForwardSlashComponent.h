@@ -1,29 +1,34 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "CombatComponent.h" 
 #include "Net/UnrealNetwork.h"
-#include "VampireAttackComponent.generated.h"
+#include "CombatComponent.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBiteDamageComplete, UCombatComponent*, OtherCombatComponent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBiteCooldownBegin, float, BiteCooldown);
+#include "ForwardSlashComponent.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamageComplete, UCombatComponent*, OtherCombatComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCooldownBegin, float, BiteCooldown);
 
 class UInputMappingContext;
 class UInputAction;
+class ACharacter;
+class UCombatComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class STEAMCOMPANY_API UVampireAttackComponent : public UActorComponent
+class STEAMCOMPANY_API UForwardSlashComponent : public UActorComponent
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
-public:    
-    // Sets default values for this component's properties
-    UVampireAttackComponent();
+public:	
+	// Sets default values for this component's properties
+	UForwardSlashComponent();
 
 protected:
-    // Called when the game starts
-    virtual void BeginPlay() override;
+	// Called when the game starts
+	virtual void BeginPlay() override;
 
     // Reference to the CombatComponent
     UPROPERTY()
@@ -41,28 +46,25 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* BiteAction;
 
-public:    
-    // Called every frame
-    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+public:	
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     // Replication setup
     virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
-	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void Bite();
+    UFUNCTION(BlueprintCallable)
+	void Attack();
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-    float BiteCooldown = 2.0f;
+    float CooldownTime = 2.0f;
 
     // Delegate for damage events
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
-    FOnBiteDamageComplete OnBiteDamageComplete;
-
-    UPROPERTY(Replicated)
-    UCombatComponent* OtherCombatComponent;
+    FOnDamageComplete OnDamageComplete;
 
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
-    FOnBiteCooldownBegin OnBiteCooldownBegin;
+    FOnCooldownBegin OnCooldownBegin;
 
     void CooldownComplete();
 
@@ -73,7 +75,4 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     float Damage = 10.0f;
-
-    UFUNCTION()
-    void OnRep_BiteDamageComplete() {}
 };

@@ -8,6 +8,7 @@
 #include "InputTriggers.h"
 #include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/PlayerController.h"
+#include "PlayerInteractableObjComponent.h"
 
 UPlayerInteractComponent::UPlayerInteractComponent()
 {
@@ -70,8 +71,11 @@ void UPlayerInteractComponent::Interact()
             {
                 if (AActor* HitActor = Hit.GetActor())
                 {
-                    // Broadcast delegate for each hit
-                    OnInteract.Broadcast(Hit);
+					UPlayerInteractableObjComponent* PlayerInteractableObjComponent = Cast<UPlayerInteractableObjComponent>(HitActor->GetComponentByClass(UPlayerInteractableObjComponent::StaticClass()));
+					if (PlayerInteractableObjComponent)
+					{
+						PlayerInteractableObjComponent->OnInteract.Broadcast();
+					}
                 }
             }
         }
