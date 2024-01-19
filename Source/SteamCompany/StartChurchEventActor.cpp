@@ -33,7 +33,7 @@ void AStartChurchEventActor::BeginPlay()
     if (PlayerInteractableObjComponent)
     {
         // Bind to the FOnActorDead delegate
-        PlayerInteractableObjComponent->OnInteract.AddDynamic(this, &AStartChurchEventActor::OnInteractHandler);
+        // PlayerInteractableObjComponent->OnInteract.AddDynamic(this, &AStartChurchEventActor::OnInteractHandler);
     }
 
     InteractableWidgetComponent->SetHiddenInGame(true);
