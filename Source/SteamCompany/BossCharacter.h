@@ -7,6 +7,8 @@
 #include "ItemPickupActor.h"
 #include "BossCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBossDead);
+
 class AItemPickupActor;
 
 UCLASS()
@@ -32,7 +34,9 @@ public:
 	UFUNCTION()
 	void HandleActorDead();
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnBossDead OnBossDead;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
 	TArray<TSubclassOf<AItemPickupActor>> DropedItemPossibilites;
-
 };

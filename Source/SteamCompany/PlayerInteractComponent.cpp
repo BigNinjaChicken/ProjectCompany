@@ -54,31 +54,30 @@ void UPlayerInteractComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 void UPlayerInteractComponent::Interact()
 {
-    APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
-    if (PlayerController)
-    {
-        FVector Start = PlayerController->PlayerCameraManager->GetCameraLocation();
-        FVector ForwardVector = PlayerController->PlayerCameraManager->GetActorForwardVector();
-        FVector End = Start + (ForwardVector * RaycastDistance);
+	APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+	if (PlayerController)
+	{
+		FVector Start = PlayerController->PlayerCameraManager->GetCameraLocation();
+		FVector ForwardVector = PlayerController->PlayerCameraManager->GetActorForwardVector();
+		FVector End = Start + (ForwardVector * RaycastDistance);
 
-        TArray<FHitResult> Hits;
-        FCollisionQueryParams CollisionParams;
-        CollisionParams.AddIgnoredActor(GetOwner());
+		TArray<FHitResult> Hits;
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(GetOwner());
 
-        if (GetWorld()->LineTraceMultiByChannel(Hits, Start, End, ECC_Visibility, CollisionParams))
-        {
-            for (const FHitResult& Hit : Hits)
-            {
-                if (AActor* HitActor = Hit.GetActor())
-                {
+		if (GetWorld()->LineTraceMultiByChannel(Hits, Start, End, ECC_Visibility, CollisionParams))
+		{
+			for (const FHitResult& Hit : Hits)
+			{
+				if (AActor* HitActor = Hit.GetActor())
+				{
 					UPlayerInteractableObjComponent* PlayerInteractableObjComponent = Cast<UPlayerInteractableObjComponent>(HitActor->GetComponentByClass(UPlayerInteractableObjComponent::StaticClass()));
 					if (PlayerInteractableObjComponent)
 					{
 						PlayerInteractableObjComponent->OnInteract.Broadcast();
 					}
-                }
-            }
-        }
-    }
+				}
+			}
+		}
+	}
 }
-

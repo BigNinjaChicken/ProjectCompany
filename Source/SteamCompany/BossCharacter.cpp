@@ -41,6 +41,8 @@ void ABossCharacter::HandleActorDead()
         AItemPickupActor* SpawnedActor = GetWorld()->SpawnActor<AItemPickupActor>(ItemActorToSpawn, GetActorLocation(), GetActorRotation(), SpawnParameters);
     }
 
+    OnBossDead.Broadcast();
+
     Destroy();
 }
 

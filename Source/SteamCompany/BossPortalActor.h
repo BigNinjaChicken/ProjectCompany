@@ -7,23 +7,22 @@
 #include "Components/BoxComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
-#include "BossEventActor.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Components/PrimitiveComponent.h"
 
-#include "StartChurchEventActor.generated.h"
+#include "BossPortalActor.generated.h"
 
 class UBoxComponent;
 class UWidgetComponent;
 class USphereComponent;
-class ABossEventActor;
 
 UCLASS()
-class STEAMCOMPANY_API AStartChurchEventActor : public AActor
+class STEAMCOMPANY_API ABossPortalActor : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AStartChurchEventActor();
+	ABossPortalActor();
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,7 +32,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintImplementableEvent)
 	void OnInteractHandler();
 
 	UFUNCTION()
@@ -50,7 +49,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UWidgetComponent* InteractableWidgetComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
-	ABossEventActor* BossEventActor;
 };

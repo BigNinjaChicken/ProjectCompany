@@ -38,7 +38,7 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnTakeDamageComplete OnTakeDamageComplete;
 
-    UPROPERTY(BlueprintAssignable, Category = "Events")
+	UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnActorDead OnActorDead;
 
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Combat")

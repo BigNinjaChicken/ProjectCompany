@@ -17,6 +17,8 @@ AStartChurchEventActor::AStartChurchEventActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+    bReplicates = true;
+
 	InteractableBoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractBoxComponent"));
 	SetRootComponent(InteractableBoxComponent);
 	InteractableWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractableWidgetComponent"));
@@ -33,7 +35,7 @@ void AStartChurchEventActor::BeginPlay()
     if (PlayerInteractableObjComponent)
     {
         // Bind to the FOnActorDead delegate
-        // PlayerInteractableObjComponent->OnInteract.AddDynamic(this, &AStartChurchEventActor::OnInteractHandler);
+        PlayerInteractableObjComponent->OnInteract.AddDynamic(this, &AStartChurchEventActor::OnInteractHandler);
     }
 
     InteractableWidgetComponent->SetHiddenInGame(true);
@@ -48,19 +50,14 @@ void AStartChurchEventActor::Tick(float DeltaTime)
 
 }
 
-void AStartChurchEventActor::OnInteractHandler(FHitResult InteractedActor)
+void AStartChurchEventActor::OnInteractHandler()
 {
-    if (InteractedActor.GetComponent() != InteractableBoxComponent) {
-        return;
-    }
-
     if (BossEventActor) {
         BossEventActor->BeginBossEvent();
     }
 
     Destroy();
 }
-
 
 
 void AStartChurchEventActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

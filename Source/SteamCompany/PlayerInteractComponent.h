@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "PlayerInteractableObjComponent.h"
 #include "PlayerInteractComponent.generated.h"
 
 class UInputMappingContext;
 class UInputAction;
+class UPlayerInteractableObjComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STEAMCOMPANY_API UPlayerInteractComponent : public UActorComponent
@@ -38,7 +40,7 @@ public:
     UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* InteractAction;
 
-	UFUNCTION(BlueprintCallable, Category="Weapon")
+	UFUNCTION()
 	void Interact();
 
 	/** Raycast distance */
