@@ -35,6 +35,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
     int32 EnemiesPerPlayer = 3;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+    int32 CurrentLevel = 0;
+
     UPROPERTY()
     int32 WaveCount;
 

@@ -86,7 +86,41 @@ void AEnemyManagerActor::SpawnEnemies()
             if (EnemySpawnNodeActors[RandomIndex])
             {
                 FTransform SpawnTransform = EnemySpawnNodeActors[RandomIndex]->GetActorTransform();
-                ACharacter* SpawnedEnemyCharacter = GetWorld()->SpawnActor<ACharacter>(EnemyCharacter, SpawnTransform);
+                ACharacter* SpawnedEnemyCharacter = nullptr;
+
+                // Variables for collision handling
+                bool bPositionFound = false;
+                const float StepHeight = 10.0f;  // Adjust this value based on your needs
+                const int MaxTries = 100;  // Prevents infinite loops
+                int CurrentTry = 0;
+
+                // Create a temporary instance for collision checks
+                ACharacter* TempEnemyCharacter = NewObject<ACharacter>(GetTransientPackage(), EnemyCharacter);
+
+                while (!bPositionFound && CurrentTry < MaxTries) {
+                    // Check if the actor can be spawned without colliding
+                    if (!GetWorld()->EncroachingBlockingGeometry(TempEnemyCharacter, SpawnTransform.GetLocation(), SpawnTransform.GetRotation().Rotator())) {
+                        // Spawn the actor if there's no collision
+                        SpawnedEnemyCharacter = GetWorld()->SpawnActor<ACharacter>(EnemyCharacter, SpawnTransform);
+                        bPositionFound = true;
+                    }
+                    else {
+                        // Move the spawn position upwards and try again
+                        FVector NewLocation = SpawnTransform.GetLocation() + FVector(0.0f, 0.0f, StepHeight);
+                        SpawnTransform.SetLocation(NewLocation);
+                        CurrentTry++;
+                    }
+                }
+
+                if (!SpawnedEnemyCharacter) {
+                    UE_LOG(LogTemp, Warning, TEXT("Failed to spawn enemy character after %d tries."), MaxTries);
+                }
+
+                // Ensure to clean up the temporary actor
+                if (TempEnemyCharacter) {
+                    TempEnemyCharacter->ConditionalBeginDestroy();
+                }
+
             }
         }
     }
