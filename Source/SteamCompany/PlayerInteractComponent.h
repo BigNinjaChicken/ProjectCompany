@@ -43,6 +43,9 @@ public:
 	UFUNCTION()
 	void Interact();
 
+    UFUNCTION(Server, Reliable)
+    void ServerInteract(UPlayerInteractableObjComponent* PlayerInteractableObjComponent);
+
 	/** Raycast distance */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	float RaycastDistance = 1000.0f;

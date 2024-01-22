@@ -36,6 +36,7 @@ void AStartChurchEventActor::BeginPlay()
     {
         // Bind to the FOnActorDead delegate
         PlayerInteractableObjComponent->OnInteract.AddDynamic(this, &AStartChurchEventActor::OnInteractHandler);
+        
     }
 
     InteractableWidgetComponent->SetHiddenInGame(true);
@@ -52,11 +53,13 @@ void AStartChurchEventActor::Tick(float DeltaTime)
 
 void AStartChurchEventActor::OnInteractHandler()
 {
-    if (BossEventActor) {
-        BossEventActor->BeginBossEvent();
-    }
+	if (BossEventActor) {
+		BossEventActor->BeginBossEvent();
+	}
 
-    Destroy();
+	Destroy();
+
+	UE_LOG(LogTemp, Warning, TEXT("Here"));
 }
 
 

@@ -74,10 +74,18 @@ void UPlayerInteractComponent::Interact()
 					UPlayerInteractableObjComponent* PlayerInteractableObjComponent = Cast<UPlayerInteractableObjComponent>(HitActor->GetComponentByClass(UPlayerInteractableObjComponent::StaticClass()));
 					if (PlayerInteractableObjComponent)
 					{
-						PlayerInteractableObjComponent->OnInteract.Broadcast();
+						ServerInteract(PlayerInteractableObjComponent);
 					}
 				}
 			}
 		}
+	}
+}
+
+void UPlayerInteractComponent::ServerInteract_Implementation(UPlayerInteractableObjComponent* PlayerInteractableObjComponent)
+{
+	if (PlayerInteractableObjComponent)
+	{
+		PlayerInteractableObjComponent->OnInteract.Broadcast();
 	}
 }
