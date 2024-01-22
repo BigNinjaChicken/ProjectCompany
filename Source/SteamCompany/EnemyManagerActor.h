@@ -21,7 +21,9 @@ protected:
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
 
-public:    
+    UFUNCTION()
+    void BeginSpawning();
+public:
     // Called every frame
     virtual void Tick(float DeltaTime) override;
 
@@ -45,4 +47,10 @@ public:
 
     UFUNCTION()
     void SpawnEnemies();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+    int EnemySpawnRateWaveIncrement = 3;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+    int EnemyIncreaseAmount = 1;
 };

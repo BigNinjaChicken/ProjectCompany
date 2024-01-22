@@ -7,6 +7,8 @@
 #include "Components/ChildActorComponent.h"
 #include "GenerateLevelActor.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevelGenerateComplete);
+
 class ULevelStreamingDynamic;
 
 UCLASS()
@@ -66,7 +68,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> EndCapLevels;
 
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> ChurchStraightLevels;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
@@ -92,4 +94,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TSubclassOf<ULevelStreamingDynamic> LevelStreamingClass;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnLevelGenerateComplete OnLevelGenerateComplete;
 };

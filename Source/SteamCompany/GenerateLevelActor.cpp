@@ -30,6 +30,8 @@ void AGenerateLevelActor::BeginPlay()
 	Super::BeginPlay();
 
 	MulticastOnBeginGenerateLevel();
+
+	OnLevelGenerateComplete.Broadcast();
 }
 
 void AGenerateLevelActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
