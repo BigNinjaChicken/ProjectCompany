@@ -14,6 +14,7 @@
 #include "../../../../../../../Source/Runtime/NavigationSystem/Public/NavMesh/NavMeshBoundsVolume.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "../../../../../../../Source/Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
+#include "../../../../../../../Source/Runtime/Core/Public/Math/RandomStream.h"
 
 // Sets default values
 AGenerateLevelActor::AGenerateLevelActor()
@@ -47,6 +48,7 @@ void AGenerateLevelActor::OnBeginGenerateLevel()
 	TArray<AActor*> ChildActors;
 	GetAttachedActors(ChildActors);
 
+	int Seed = 100;
 	for (AActor* ChildActor : ChildActors) {
 		ATileActor* TileActor = Cast<ATileActor>(ChildActor);
 		if (!TileActor) continue;
@@ -58,59 +60,61 @@ void AGenerateLevelActor::OnBeginGenerateLevel()
 		Position.Y *= ScaleFactor;
 		FRotator Rotation = TileActor->GetActorRotation();
 
+		FRandomStream RandomStream(Seed);
+		Seed++;
 		switch (TileActor->TileShape)
 		{
 		case ETileShape::Straight:
 			// Handle Straight logic
 			if (TileActor->bIsChurch) {
-				LevelIndex = FMath::RandRange(0, ChurchStraightLevels.Num() - 1);
+				LevelIndex = RandomStream.RandRange(0, ChurchStraightLevels.Num() - 1);
 				LoadLevelAtPosition(World, ChurchStraightLevels[LevelIndex], Position, Rotation);
 			}
 			else {
-				LevelIndex = FMath::RandRange(0, StraightLevels.Num() - 1);
+				LevelIndex = RandomStream.RandRange(0, StraightLevels.Num() - 1);
 				LoadLevelAtPosition(World, StraightLevels[LevelIndex], Position, Rotation);
 			}
 			break;
 		case ETileShape::Corner:
 			// Handle Corner logic
 			if (TileActor->bIsChurch) {
-				LevelIndex = FMath::RandRange(0, ChurchCornerLevels.Num() - 1);
+				LevelIndex = RandomStream.RandRange(0, ChurchCornerLevels.Num() - 1);
 				LoadLevelAtPosition(World, ChurchCornerLevels[LevelIndex], Position, Rotation);
 			}
 			else {
-				LevelIndex = FMath::RandRange(0, CornerLevels.Num() - 1);
+				LevelIndex = RandomStream.RandRange(0, CornerLevels.Num() - 1);
 				LoadLevelAtPosition(World, CornerLevels[LevelIndex], Position, Rotation);
 			}
 			break;
 		case ETileShape::ThreeWayIntersection:
 			if (TileActor->bIsChurch) {
-				LevelIndex = FMath::RandRange(0, ChurchThreeWayIntersectionLevels.Num() - 1);
+				LevelIndex = RandomStream.RandRange(0, ChurchThreeWayIntersectionLevels.Num() - 1);
 				LoadLevelAtPosition(World, ChurchThreeWayIntersectionLevels[LevelIndex], Position, Rotation);
 			}
 			else {
-				LevelIndex = FMath::RandRange(0, ThreeWayIntersectionLevels.Num() - 1);
+				LevelIndex = RandomStream.RandRange(0, ThreeWayIntersectionLevels.Num() - 1);
 				LoadLevelAtPosition(World, ThreeWayIntersectionLevels[LevelIndex], Position, Rotation);
 			}
 			break;
 		case ETileShape::FourWayIntersection:
 			// Handle FourWayIntersection logic
 			if (TileActor->bIsChurch) {
-				LevelIndex = FMath::RandRange(0, ChurchFourWayIntersectionLevels.Num() - 1);
+				LevelIndex = RandomStream.RandRange(0, ChurchFourWayIntersectionLevels.Num() - 1);
 				LoadLevelAtPosition(World, ChurchFourWayIntersectionLevels[LevelIndex], Position, Rotation);
 			}
 			else {
-				LevelIndex = FMath::RandRange(0, FourWayIntersectionLevels.Num() - 1);
+				LevelIndex = RandomStream.RandRange(0, FourWayIntersectionLevels.Num() - 1);
 				LoadLevelAtPosition(World, FourWayIntersectionLevels[LevelIndex], Position, Rotation);
 			}
 			break;
 		case ETileShape::EndCap:;
 			// Handle EndCap logic
 			if (TileActor->bIsChurch) {
-				LevelIndex = FMath::RandRange(0, ChurchEndCapLevels.Num() - 1);
+				LevelIndex = RandomStream.RandRange(0, ChurchEndCapLevels.Num() - 1);
 				LoadLevelAtPosition(World, ChurchEndCapLevels[LevelIndex], Position, Rotation);
 			}
 			else {
-				LevelIndex = FMath::RandRange(0, EndCapLevels.Num() - 1);
+				LevelIndex = RandomStream.RandRange(0, EndCapLevels.Num() - 1);
 				LoadLevelAtPosition(World, EndCapLevels[LevelIndex], Position, Rotation);
 			}
 			break;
