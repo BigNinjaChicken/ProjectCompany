@@ -26,11 +26,11 @@ protected:
 
 	// Replication setup
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
-
+public:
     void OnBeginGenerateLevel();
 
 	void LoadLevelAtPosition(UWorld* World, const TSoftObjectPtr<UWorld>& MapAsset, const FVector& Position, const FRotator& Rotation);
-public:
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -40,9 +40,6 @@ public:
 
 	UPROPERTY(Replicated)
 	int32 LevelIndex;
-
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Grid")
-	int32 Indexl;
 
 	// Grid dimensions
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
