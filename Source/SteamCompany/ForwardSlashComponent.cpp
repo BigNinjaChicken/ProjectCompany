@@ -118,12 +118,9 @@ void UForwardSlashComponent::Attack()
         {
             OtherCombatComp = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
             if (OtherCombatComp) {
-                // Disables friendly fire
-                if (!OtherCombatComp->bIsFriendly) {
-                    ServerRequestDamage(OtherCombatComp, Damage * CombatComp->StrengthMultiplier);
-                    CombatComp->EnterCombat();
-                    OnDamageComplete.Broadcast(OtherCombatComp);
-                }
+                ServerRequestDamage(OtherCombatComp, Damage * CombatComp->StrengthMultiplier);
+                CombatComp->EnterCombat();
+                OnDamageComplete.Broadcast(OtherCombatComp);
             }
         }
     }

@@ -13,6 +13,7 @@
 #include "GameFramework/PlayerController.h"
 #include "../../../../../../../Source/Runtime/NavigationSystem/Public/NavMesh/NavMeshBoundsVolume.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "../../../../../../../Source/Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
 
 // Sets default values
 AGenerateLevelActor::AGenerateLevelActor()
@@ -29,7 +30,7 @@ void AGenerateLevelActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MulticastOnBeginGenerateLevel();
+	OnBeginGenerateLevel();
 
 	OnLevelGenerateComplete.Broadcast();
 }
@@ -37,9 +38,11 @@ void AGenerateLevelActor::BeginPlay()
 void AGenerateLevelActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGenerateLevelActor, LevelIndex);
 }
 
-void AGenerateLevelActor::MulticastOnBeginGenerateLevel_Implementation()
+void AGenerateLevelActor::OnBeginGenerateLevel()
 {
 	TArray<AActor*> ChildActors;
 	GetAttachedActors(ChildActors);
@@ -48,16 +51,13 @@ void AGenerateLevelActor::MulticastOnBeginGenerateLevel_Implementation()
 		ATileActor* TileActor = Cast<ATileActor>(ChildActor);
 		if (!TileActor) continue;
 
-		// Example parameters - you need to provide actual parameters as per your game logic
 		UWorld* World = GetWorld();
-		TSoftObjectPtr<UWorld> MapAsset; // Example, replace with actual asset
 
 		FVector Position = TileActor->GetActorLocation();
 		Position.X *= ScaleFactor;
 		Position.Y *= ScaleFactor;
 		FRotator Rotation = TileActor->GetActorRotation();
 
-		int32 LevelIndex;
 		switch (TileActor->TileShape)
 		{
 		case ETileShape::Straight:
@@ -121,14 +121,20 @@ void AGenerateLevelActor::MulticastOnBeginGenerateLevel_Implementation()
 	}
 }
 
-// Function to load a level into the current level at a specified position and rotation
+// Function to load a level into the current level at a specified position and rotation _Implementation
 void AGenerateLevelActor::LoadLevelAtPosition(UWorld* World, const TSoftObjectPtr<UWorld>& MapAsset, const FVector& Position, const FRotator& Rotation)
 {
 	if (MapAsset.IsNull())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("MapAsset is null"));
+		return;
 	}
-	
+
+	if (!World) {
+		UE_LOG(LogTemp, Warning, TEXT("World is null"));
+		return;
+	}
+
 	FString MapPath = MapAsset.GetLongPackageName();
 	bool bOutSuccess;
 	FString LevelName = "LevelTile" + FString::FromInt(LevelNameIndex);

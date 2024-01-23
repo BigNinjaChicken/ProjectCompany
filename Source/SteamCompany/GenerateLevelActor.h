@@ -27,8 +27,7 @@ protected:
 	// Replication setup
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
-	UFUNCTION(NetMulticast, Reliable)
-    void MulticastOnBeginGenerateLevel();
+    void OnBeginGenerateLevel();
 
 	void LoadLevelAtPosition(UWorld* World, const TSoftObjectPtr<UWorld>& MapAsset, const FVector& Position, const FRotator& Rotation);
 public:
@@ -38,6 +37,12 @@ public:
 	// Grid generation function
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Grid")
 	void GenerateGrid();
+
+	UPROPERTY(Replicated)
+	int32 LevelIndex;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	int32 Indexl;
 
 	// Grid dimensions
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")

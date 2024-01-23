@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Engine/LevelStreamingDynamic.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AVampirePlayerCharacter
