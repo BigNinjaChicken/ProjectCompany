@@ -8,12 +8,24 @@
 #include "LevelAdvancedFriendsGameInstance.generated.h"
 
 USTRUCT(BlueprintType)
+struct FItemData
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+    TSubclassOf<UItemEffectComponent> ItemEffectComponent;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+    int32 ItemCount;
+};
+
+USTRUCT(BlueprintType)
 struct FItemEffectComponentArray
 {
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
-    TArray<TSubclassOf<UItemEffectComponent>> ItemEffectComponents;
+    TArray<FItemData> PlayerItems;
 };
 
 

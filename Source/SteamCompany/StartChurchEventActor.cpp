@@ -58,8 +58,6 @@ void AStartChurchEventActor::OnInteractHandler()
 	}
 
 	Destroy();
-
-	UE_LOG(LogTemp, Warning, TEXT("Here"));
 }
 
 

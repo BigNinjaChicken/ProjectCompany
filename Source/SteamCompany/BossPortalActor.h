@@ -32,7 +32,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION()
 	void OnInteractHandler();
 
 	UFUNCTION()

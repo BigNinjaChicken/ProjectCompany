@@ -29,7 +29,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void AddItemEffect(TSubclassOf<UItemEffectComponent> ItemType);
+	void AddItemEffect(TSubclassOf<UItemEffectComponent> ItemType, int32 ItemCount = 1);
 
 // 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 // 	TArray<TSubclassOf<UItemEffectComponent>> CurrentItems;
