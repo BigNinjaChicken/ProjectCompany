@@ -52,6 +52,8 @@ Plugins/*/Binaries/*
 # Builds
 Build/*
 
+Content/Gussy/ModularGothicFantasyEnvironment/Maps/*
+
 # Whitelist PakBlacklist-<BuildConfiguration>.txt files
 !Build/*/
 Build/*/**
