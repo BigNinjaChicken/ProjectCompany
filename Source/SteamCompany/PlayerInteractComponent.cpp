@@ -52,8 +52,22 @@ void UPlayerInteractComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 }
 
+void UPlayerInteractComponent::ResetInteract()
+{
+	bCanInteract = true; // Reset the flag so the player can interact again
+}
+
 void UPlayerInteractComponent::Interact()
 {
+	if (!bCanInteract)
+	{
+		return; 
+	}
+
+	bCanInteract = false; // Set flag to false as player just interacted
+	GetWorld()->GetTimerManager().SetTimer(InteractCooldownTimerHandle, this, &UPlayerInteractComponent::ResetInteract, 0.5f, false); // Start cooldown timer
+
+
 	APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
 	if (PlayerController)
 	{
