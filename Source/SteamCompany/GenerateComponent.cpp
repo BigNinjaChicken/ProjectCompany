@@ -10,7 +10,6 @@
 #include "Engine/Engine.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "GameFramework/PlayerController.h"
-#include "../../../../../../../Source/Runtime/NavigationSystem/Public/NavMesh/NavMeshBoundsVolume.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "../../../../../../../Source/Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
 #include "LevelAdvancedFriendsGameInstance.h"
