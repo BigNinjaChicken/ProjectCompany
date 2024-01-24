@@ -13,6 +13,8 @@ void UIncreaseMaxHealthComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CombatComponent = Cast<UCombatComponent>(GetOwner()->GetComponentByClass(UCombatComponent::StaticClass()));
+
+	CombatComponent->MaxHealth += ItemCount * 0.3;
 }
 
 

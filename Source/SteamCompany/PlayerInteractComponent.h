@@ -28,9 +28,20 @@ protected:
     UPROPERTY()
     ACharacter* Character;
 
+	// Cooldown management
+	UPROPERTY()
+	bool bCanInteract = true; // Initially, the player can interact
+
+	UPROPERTY()
+	FTimerHandle InteractCooldownTimerHandle;
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	// Function to reset interaction availability after cooldown
+	UFUNCTION()
+	void ResetInteract();
 
 	/** MappingContext */
     UPROPERTY(EditAnywhere, Category = "Input")
