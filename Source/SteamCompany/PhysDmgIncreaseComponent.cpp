@@ -13,6 +13,8 @@ void UPhysDmgIncreaseComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CombatComponent = Cast<UCombatComponent>(GetOwner()->GetComponentByClass(UCombatComponent::StaticClass()));
+
+	CombatComponent->StrengthMultiplier += ItemCount * 0.3;
 }
 
 
