@@ -8,21 +8,16 @@
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/PrimitiveComponent.h"
-
-#include "BossPortalActor.generated.h"
-
-class UBoxComponent;
-class UWidgetComponent;
-class USphereComponent;
+#include "ShopActor.generated.h"
 
 UCLASS()
-class STEAMCOMPANY_API ABossPortalActor : public AActor
+class STEAMCOMPANY_API AShopActor : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ABossPortalActor();
+	AShopActor();
 
 protected:
 	// Called when the game starts or when spawned
@@ -32,13 +27,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
 	UFUNCTION()
 	void OnInteractHandler();
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	
+
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
@@ -50,5 +44,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UWidgetComponent* InteractableWidgetComponent;
-
 };
