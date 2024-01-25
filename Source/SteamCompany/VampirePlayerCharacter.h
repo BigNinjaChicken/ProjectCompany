@@ -12,7 +12,6 @@ class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
-
 UCLASS(config=Game)
 class AVampirePlayerCharacter : public ACharacter
 {

@@ -89,6 +89,7 @@ void UDialogSystemComponent::Interact()
 		CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
 		GetWorld()->GetTimerManager().ClearTimer(CameraLerpTimerHandle);
 
+		CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
 		CameraComponent->bUsePawnControlRotation = true;
 
 		return;

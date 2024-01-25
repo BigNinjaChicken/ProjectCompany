@@ -28,10 +28,10 @@ void UItemStackComponent::BeginPlay()
         return;
     }
 
-    ASteamCompanyPlayerController* PlayerController = Cast<ASteamCompanyPlayerController>(Cast<APawn>(GetOwner())->GetController());
+    APlayerController* PlayerController = Cast<APlayerController>(Cast<APawn>(GetOwner())->GetController());
     if (!PlayerController)
     {
-        UE_LOG(LogTemp, Warning, TEXT("PlayerController is not ASteamCompanyPlayerController"));
+        UE_LOG(LogTemp, Warning, TEXT("PlayerController is not APlayerController"));
         return;
     }
 
@@ -115,7 +115,7 @@ void UItemStackComponent::UpdateItemSave() {
         if (CombatComponent && CombatComponent->bIsPlayer)
         {
             FString PlayerName;
-            ASteamCompanyPlayerController* PlayerController = Cast<ASteamCompanyPlayerController>(Cast<APawn>(CharacterActor)->GetController());
+            APlayerController* PlayerController = Cast<APlayerController>(Cast<APawn>(CharacterActor)->GetController());
             FBPUniqueNetId UniqueID;
             UAdvancedSessionsLibrary::GetUniqueNetID(PlayerController, UniqueID);
             UAdvancedSessionsLibrary::UniqueNetIdToString(UniqueID, PlayerName);

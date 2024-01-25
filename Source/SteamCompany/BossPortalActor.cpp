@@ -66,7 +66,7 @@ void ABossPortalActor::OnInteractHandler()
 //         if (CombatComponent && CombatComponent->bIsPlayer) 
 //         {
 //             FString PlayerName;
-//             ASteamCompanyPlayerController* PlayerController = Cast<ASteamCompanyPlayerController>(Cast<APawn>(CharacterActor)->GetController());
+//             APlayerController* PlayerController = Cast<APlayerController>(Cast<APawn>(CharacterActor)->GetController());
 //             FBPUniqueNetId UniqueID;
 //             UAdvancedSessionsLibrary::GetUniqueNetID(PlayerController, UniqueID);
 //             UAdvancedSessionsLibrary::UniqueNetIdToString(UniqueID, PlayerName);
