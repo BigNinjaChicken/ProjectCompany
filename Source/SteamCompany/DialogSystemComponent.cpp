@@ -52,16 +52,21 @@ void UDialogSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UDialogSystemComponent::BeginDialog()
 {
+	BeginDialog_Client();
+}
+
+void UDialogSystemComponent::BeginDialog_Client_Implementation()
+{
 	bInDialog = true;
 
 	ULevelAdvancedFriendsGameInstance* GameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	CurrentLevel = GameInstance->CurrentLevel;
 
-	if (!LevelDialog.Contains(CurrentLevel)) 
- 	{
+	if (!LevelDialog.Contains(CurrentLevel))
+	{
 		UE_LOG(LogTemp, Warning, TEXT("No dialog for level"));
 		return;
- 	}
+	}
 
 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
 	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;

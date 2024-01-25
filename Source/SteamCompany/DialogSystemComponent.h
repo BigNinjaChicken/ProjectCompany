@@ -58,6 +58,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void BeginDialog();
 
+	UFUNCTION(Client, Reliable)
+	void BeginDialog_Client();
+
 	UFUNCTION()
 	void LerpCameraToJester();
 

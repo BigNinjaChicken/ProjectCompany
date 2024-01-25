@@ -1,5 +1,7 @@
 #include "CombatComponent.h"
 #include "Engine/World.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/PlayerController.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -11,6 +13,15 @@ void UCombatComponent::BeginPlay()
 {
     Super::BeginPlay();
     Health = MaxHealth;
+
+    ACharacter* Character = Cast<ACharacter>(GetOwner());
+    if (Character) {
+        APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+        if (PlayerController) {
+            FInputModeGameOnly InputModeGameOnly;
+            PlayerController->SetInputMode(InputModeGameOnly);
+        }
+    }
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
