@@ -56,38 +56,38 @@ void ABossPortalActor::Tick(float DeltaTime)
 // return;
 void ABossPortalActor::OnInteractHandler()
 {
-    ULevelAdvancedFriendsGameInstance* AdvancedFriendsGameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-    TArray<AActor*> CharacterActors;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), CharacterActors);
-
-    for (AActor* CharacterActor : CharacterActors)
-    {
-        UCombatComponent* CombatComponent = Cast<UCombatComponent>(CharacterActor->GetComponentByClass(UCombatComponent::StaticClass()));
-        if (CombatComponent && CombatComponent->bIsPlayer) 
-        {
-            FString PlayerName;
-            ASteamCompanyPlayerController* PlayerController = Cast<ASteamCompanyPlayerController>(Cast<APawn>(CharacterActor)->GetController());
-            FBPUniqueNetId UniqueID;
-            UAdvancedSessionsLibrary::GetUniqueNetID(PlayerController, UniqueID);
-            UAdvancedSessionsLibrary::UniqueNetIdToString(UniqueID, PlayerName);
-
-            TArray<UActorComponent*> ItemEffectActorComponents;
-            CharacterActor->GetComponents(UItemEffectComponent::StaticClass(), ItemEffectActorComponents);
-
-            FItemEffectComponentArray ItemEffectComponentArray;
-            for (UActorComponent* ItemEffectActorComponent : ItemEffectActorComponents) {
-                UItemEffectComponent* ItemEffectComponent = Cast<UItemEffectComponent>(ItemEffectActorComponent);
-                if (ItemEffectComponent) {
-                    FItemData ItemData;
-                    ItemData.ItemEffectComponent = ItemEffectComponent->GetClass();
-                    ItemData.ItemCount = ItemEffectComponent->ItemCount;
-                    ItemEffectComponentArray.PlayerItems.Add(ItemData);
-                }
-            }
-
-            AdvancedFriendsGameInstance->PlayerItemsMap.Add(PlayerName, ItemEffectComponentArray);
-        }
-    }
+//     ULevelAdvancedFriendsGameInstance* AdvancedFriendsGameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+//     TArray<AActor*> CharacterActors;
+//     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), CharacterActors);
+// 
+//     for (AActor* CharacterActor : CharacterActors)
+//     {
+//         UCombatComponent* CombatComponent = Cast<UCombatComponent>(CharacterActor->GetComponentByClass(UCombatComponent::StaticClass()));
+//         if (CombatComponent && CombatComponent->bIsPlayer) 
+//         {
+//             FString PlayerName;
+//             ASteamCompanyPlayerController* PlayerController = Cast<ASteamCompanyPlayerController>(Cast<APawn>(CharacterActor)->GetController());
+//             FBPUniqueNetId UniqueID;
+//             UAdvancedSessionsLibrary::GetUniqueNetID(PlayerController, UniqueID);
+//             UAdvancedSessionsLibrary::UniqueNetIdToString(UniqueID, PlayerName);
+// 
+//             TArray<UActorComponent*> ItemEffectActorComponents;
+//             CharacterActor->GetComponents(UItemEffectComponent::StaticClass(), ItemEffectActorComponents);
+// 
+//             FItemEffectComponentArray ItemEffectComponentArray;
+//             for (UActorComponent* ItemEffectActorComponent : ItemEffectActorComponents) {
+//                 UItemEffectComponent* ItemEffectComponent = Cast<UItemEffectComponent>(ItemEffectActorComponent);
+//                 if (ItemEffectComponent) {
+//                     FItemData ItemData;
+//                     ItemData.ItemEffectComponent = ItemEffectComponent->GetClass();
+//                     ItemData.ItemCount = ItemEffectComponent->ItemCount;
+//                     ItemEffectComponentArray.PlayerItems.Add(ItemData);
+//                 }
+//             }
+// 
+//             AdvancedFriendsGameInstance->PlayerItemsMap.Add(PlayerName, ItemEffectComponentArray);
+//         }
+//     }
 
     FString InUrl = "/Game/Frazier/Creative/LV_Lair?listen";
     UAdvancedSessionsLibrary::ServerTravel(GetWorld(), InUrl, false, false);

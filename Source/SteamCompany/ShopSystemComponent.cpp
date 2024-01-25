@@ -12,6 +12,7 @@
 #include "JesterActor.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
+#include "ShopActor.h"
 
 UShopSystemComponent::UShopSystemComponent()
 {
@@ -30,17 +31,10 @@ void UShopSystemComponent::BeginPlay()
 	}
 
 	PlayerController = Cast<APlayerController>(Character->GetController());
-	if (PlayerController)
+	if (!PlayerController)
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(InteractMappingContext, 1);
-		}
-
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
-		{
-			EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &UShopSystemComponent::Interact);
-		}
+		UE_LOG(LogTemp, Warning, TEXT("PlayerController null"));
+		return;
 	}
 }
 
@@ -49,8 +43,38 @@ void UShopSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
+void UShopSystemComponent::EndShop() {
+	OnEndDialog.Broadcast();
+
+	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+	CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+	GetWorld()->GetTimerManager().ClearTimer(CameraLerpTimerHandle);
+
+	FInputModeGameOnly InputModeGameOnly;
+	PlayerController->SetInputMode(InputModeGameOnly);
+
+	CameraComponent->bUsePawnControlRotation = true;
+
+	PlayerController->bShowMouseCursor = false;
+
+	return;
+}
+
 void UShopSystemComponent::Interact()
 {
+	if (bDoOnce) { return; }
+	bDoOnce = true;
+
+	if (ItemOptions.Num() == 0) {
+		UE_LOG(LogTemp, Warning, TEXT("No ItemOptions"));
+		return;
+	}
+
+	FInputModeUIOnly InputModeUIOnly;
+	PlayerController->SetInputMode(InputModeUIOnly);
+
+	PlayerController->bShowMouseCursor = true;
+
 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
 	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
 	CharacterMovementComponent->MaxWalkSpeed = 0.0f;
@@ -67,7 +91,7 @@ void UShopSystemComponent::Interact()
 
 void UShopSystemComponent::LerpCameraToJester()
 {
-	ShopKeeperActor = UGameplayStatics::GetActorOfClass(GetWorld(), AJesterActor::StaticClass());
+	ShopKeeperActor = UGameplayStatics::GetActorOfClass(GetWorld(), AShopActor::StaticClass());
 	if (!ShopKeeperActor)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("JesterActor is not set"));
@@ -90,7 +114,7 @@ void UShopSystemComponent::UpdateCameraLerp()
 	}
 
 	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(CameraComponent->GetComponentLocation(), ShopKeeperActor->GetActorLocation());
-	FRotator NewRotation = FMath::RInterpTo(CameraComponent->GetComponentRotation(), TargetRotation, DeltaTime, 1.0f);
+	FRotator NewRotation = FMath::RInterpTo(CameraComponent->GetComponentRotation(), TargetRotation, DeltaTime, 8.0f);
 	CameraComponent->SetWorldRotation(NewRotation);
 }
 

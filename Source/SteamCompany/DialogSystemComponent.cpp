@@ -52,6 +52,8 @@ void UDialogSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UDialogSystemComponent::BeginDialog()
 {
+	bInDialog = true;
+
 	ULevelAdvancedFriendsGameInstance* GameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	CurrentLevel = GameInstance->CurrentLevel;
 
@@ -72,6 +74,14 @@ void UDialogSystemComponent::BeginDialog()
 
 void UDialogSystemComponent::Interact()
 {
+	if (!bInDialog) return;
+
+	if (!LevelDialog.Contains(CurrentLevel))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No dialog for level"));
+		return;
+	}
+
 	if (CurrentLineIndex == LevelDialog[CurrentLevel].Lines.Num()) {
 		OnEndDialog.Broadcast();
 

@@ -82,6 +82,8 @@ public:
 	UFUNCTION()
 	void Interact();
 
+	bool bInDialog = false;
+
 	int32 CurrentLineIndex = 0;
 	int32 CurrentLevel = 0;
 

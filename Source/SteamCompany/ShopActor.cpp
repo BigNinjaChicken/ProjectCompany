@@ -14,6 +14,7 @@
 #include "CombatComponent.h"
 #include "Starter/SteamCompanyPlayerController.h"
 #include "../Classes/AdvancedSessionsLibrary.h"
+#include "ShopSystemComponent.h"
 
 // Sets default values
 AShopActor::AShopActor()
@@ -65,33 +66,10 @@ void AShopActor::OnInteractHandler()
         UCombatComponent* CombatComponent = Cast<UCombatComponent>(CharacterActor->GetComponentByClass(UCombatComponent::StaticClass()));
         if (CombatComponent && CombatComponent->bIsPlayer)
         {
-            FString PlayerName;
-            ASteamCompanyPlayerController* PlayerController = Cast<ASteamCompanyPlayerController>(Cast<APawn>(CharacterActor)->GetController());
-            FBPUniqueNetId UniqueID;
-            UAdvancedSessionsLibrary::GetUniqueNetID(PlayerController, UniqueID);
-            UAdvancedSessionsLibrary::UniqueNetIdToString(UniqueID, PlayerName);
-
-            TArray<UActorComponent*> ItemEffectActorComponents;
-            CharacterActor->GetComponents(UItemEffectComponent::StaticClass(), ItemEffectActorComponents);
-
-            FItemEffectComponentArray ItemEffectComponentArray;
-            for (UActorComponent* ItemEffectActorComponent : ItemEffectActorComponents) {
-                UItemEffectComponent* ItemEffectComponent = Cast<UItemEffectComponent>(ItemEffectActorComponent);
-                if (ItemEffectComponent) {
-                    FItemData ItemData;
-                    ItemData.ItemEffectComponent = ItemEffectComponent->GetClass();
-                    ItemData.ItemCount = ItemEffectComponent->ItemCount;
-                    ItemEffectComponentArray.PlayerItems.Add(ItemData);
-                }
-            }
-
-            AdvancedFriendsGameInstance->PlayerItemsMap.Add(PlayerName, ItemEffectComponentArray);
+            UShopSystemComponent* ShopSystemComponent = Cast<UShopSystemComponent>(CharacterActor->GetComponentByClass(UShopSystemComponent::StaticClass()));
+            ShopSystemComponent->Interact();
         }
     }
-
-    FString InUrl = "/Game/Frazier/Creative/LV_Lair?listen";
-    UAdvancedSessionsLibrary::ServerTravel(GetWorld(), InUrl, false, false);
-    Destroy();
 }
 
 void AShopActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

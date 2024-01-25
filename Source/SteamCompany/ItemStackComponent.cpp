@@ -6,6 +6,9 @@
 #include "Starter/SteamCompanyPlayerController.h"
 #include "../Classes/AdvancedSessionsLibrary.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Components/ActorComponent.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
+#include "CombatComponent.h"
 
 UItemStackComponent::UItemStackComponent()
 {
@@ -97,5 +100,41 @@ void UItemStackComponent::AddItemEffect(TSubclassOf<UItemEffectComponent> ItemTy
         ItemEffectComponent->UpdateStats(ItemCount);
     }
 
+    UpdateItemSave();
     OnUpdateCurrentItems.Broadcast();
+}
+
+void UItemStackComponent::UpdateItemSave() {
+    ULevelAdvancedFriendsGameInstance* AdvancedFriendsGameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+    TArray<AActor*> CharacterActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), CharacterActors);
+
+    for (AActor* CharacterActor : CharacterActors)
+    {
+        UCombatComponent* CombatComponent = Cast<UCombatComponent>(CharacterActor->GetComponentByClass(UCombatComponent::StaticClass()));
+        if (CombatComponent && CombatComponent->bIsPlayer)
+        {
+            FString PlayerName;
+            ASteamCompanyPlayerController* PlayerController = Cast<ASteamCompanyPlayerController>(Cast<APawn>(CharacterActor)->GetController());
+            FBPUniqueNetId UniqueID;
+            UAdvancedSessionsLibrary::GetUniqueNetID(PlayerController, UniqueID);
+            UAdvancedSessionsLibrary::UniqueNetIdToString(UniqueID, PlayerName);
+
+            TArray<UActorComponent*> ItemEffectActorComponents;
+            CharacterActor->GetComponents(UItemEffectComponent::StaticClass(), ItemEffectActorComponents);
+
+            FItemEffectComponentArray ItemEffectComponentArray;
+            for (UActorComponent* ItemEffectActorComponent : ItemEffectActorComponents) {
+                UItemEffectComponent* ItemEffectComponent = Cast<UItemEffectComponent>(ItemEffectActorComponent);
+                if (ItemEffectComponent) {
+                    FItemData ItemData;
+                    ItemData.ItemEffectComponent = ItemEffectComponent->GetClass();
+                    ItemData.ItemCount = ItemEffectComponent->ItemCount;
+                    ItemEffectComponentArray.PlayerItems.Add(ItemData);
+                }
+            }
+
+            AdvancedFriendsGameInstance->PlayerItemsMap.Add(PlayerName, ItemEffectComponentArray);
+        }
+    }
 }

@@ -37,6 +37,9 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(BlueprintCallable)
+	void EndShop();
+
 	// Delegate for changing dialog text
     UPROPERTY(BlueprintAssignable, Category="Dialog")
 	FOnShopChange OnShopChange;
@@ -67,6 +70,8 @@ public:
 
 	UFUNCTION()
 	void Interact();
+
+	bool bDoOnce = false;
 
 	int32 CurrentLineIndex = 0;
 	int32 CurrentLevel = 0;

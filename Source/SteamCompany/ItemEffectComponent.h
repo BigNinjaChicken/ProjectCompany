@@ -31,6 +31,9 @@ public:
 
 	virtual void UpdateStats(int32 ChangeInItemAmount);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
     UTexture2D* ItemIconTexture;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	FString ItemName = "Null Item";
 };
