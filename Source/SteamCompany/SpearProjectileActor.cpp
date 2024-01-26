@@ -10,6 +10,7 @@
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/StaticMeshComponent.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/BoxComponent.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/ProjectileMovementComponent.h"
+#include "CombatComponent.h"
 
 ASpearProjectileActor::ASpearProjectileActor()
 {
@@ -23,7 +24,7 @@ ASpearProjectileActor::ASpearProjectileActor()
     ArrowTipBoxComponent->SetupAttachment(ArrowStaticMesh);
 
     ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
-    ProjectileMovementComponent->UpdatedComponent = ArrowStaticMesh; // Setting the component to be updated by the projectile movement
+    
 }
 
 // Called when the game starts or when spawned
@@ -32,6 +33,7 @@ void ASpearProjectileActor::BeginPlay()
 	Super::BeginPlay();
 
     ArrowTipBoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ASpearProjectileActor::OnArrowTipOverlap);
+    ProjectileMovementComponent->UpdatedComponent = RootComponent;
 
 }
 
@@ -44,6 +46,20 @@ void ASpearProjectileActor::Tick(float DeltaTime)
 
 void ASpearProjectileActor::OnArrowTipOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-   // ProjectileMovementComponent->StopMovementImmediately();
+    // Log the name of the other actor
+    if (OtherActor->IsA(ASpearProjectileActor::StaticClass())) return;
+
+    UCombatComponent* CombatComponent = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
+    if (CombatComponent && CombatComponent->bIsPlayer) {
+        CombatComponent->ServerTakeDamage(20.0f);
+        Destroy();
+    }
+
+    if (CombatComponent) return;
+
+    ProjectileMovementComponent->StopMovementImmediately();
+    ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
+
+    ArrowTipBoxComponent->OnComponentBeginOverlap.RemoveDynamic(this, &ASpearProjectileActor::OnArrowTipOverlap);
 }
 

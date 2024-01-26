@@ -68,21 +68,25 @@ void USpearThrowComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty 
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    DOREPLIFETIME(USpearThrowComponent, OnDamageComplete);
+    DOREPLIFETIME(USpearThrowComponent, OnSpearThrown);
     DOREPLIFETIME(USpearThrowComponent, OnCooldownBegin);
 }
 
 void USpearThrowComponent::Attack()
 {
     if (bOnCooldown) {
+        UE_LOG(LogTemp, Warning, TEXT("Attack attempted during cooldown."));
         return;
     }
 
     if (!Character)
     {
+        UE_LOG(LogTemp, Warning, TEXT("No Character"));
         return;
     }
 
+    // Log cooldown time
+    UE_LOG(LogTemp, Log, TEXT("Cooldown time: %f"), CooldownTime);
     OnCooldownBegin.Broadcast(CooldownTime);
     bOnCooldown = true;
     FTimerHandle CooldownTimerHandle;
@@ -97,14 +101,44 @@ void USpearThrowComponent::Attack()
     FActorSpawnParameters SpawnParams;
     SpawnParams.Owner = GetOwner();
     SpawnParams.Instigator = Character;
+    SpawnParams.bNoFail = true;
 
     FVector SpawnLocation = Character->GetActorLocation();
     FRotator SpawnRotation = Character->GetActorRotation();
 
-    SpawnedProjectile = GetWorld()->SpawnActor<ASpearProjectileActor>(SpearProjectileActor, SpawnLocation, SpawnRotation, SpawnParams);
+    // Log spawn location and rotation
+    UE_LOG(LogTemp, Log, TEXT("Spawn Location: %s, Spawn Rotation: %s"), *SpawnLocation.ToString(), *SpawnRotation.ToString());
 
-    GetWorld()->GetTimerManager().SetTimer(ProjectileMovementTimerHandle, this, &USpearThrowComponent::StartProjectileMovement, 1.0, false);
+    SpawnedProjectile = GetWorld()->SpawnActor<ASpearProjectileActor>(SpearProjectileActor, SpawnLocation, SpawnRotation, SpawnParams);
+    if (!SpawnedProjectile) {
+        UE_LOG(LogTemp, Warning, TEXT("Failed to spawn projectile"));
+        return;
+    }
+
+    // Confirm projectile spawning
+    UE_LOG(LogTemp, Log, TEXT("Projectile spawned successfully"));
+
+    OnSpearThrown.Broadcast(SpawnedProjectile);
+
+    EAttachmentRule LocationRule = EAttachmentRule::SnapToTarget;
+    EAttachmentRule RotationRule = EAttachmentRule::KeepRelative;
+    EAttachmentRule ScaleRule = EAttachmentRule::KeepWorld;
+    FAttachmentTransformRules AttachmentTransformRules(LocationRule, RotationRule, ScaleRule, false);
+    FName Name = "DEF-hand_RSocket";
+
+    // Checking if Character is still valid before attaching
+    if (Character) {
+        SpawnedProjectile->AttachToComponent(Character->GetMesh(), AttachmentTransformRules, Name);
+        // Log attachment
+        UE_LOG(LogTemp, Log, TEXT("Projectile attached to %s"), *Name.ToString());
+    }
+    else {
+        UE_LOG(LogTemp, Warning, TEXT("Character invalid when attempting to attach projectile"));
+    }
+
+    GetWorld()->GetTimerManager().SetTimer(ProjectileMovementTimerHandle, this, &USpearThrowComponent::StartProjectileMovement, 0.54f, false);
 }
+
 
 void USpearThrowComponent::CooldownComplete()
 {
@@ -121,9 +155,24 @@ void USpearThrowComponent::ServerRequestDamage_Implementation(UCombatComponent* 
 
 void USpearThrowComponent::StartProjectileMovement()
 {
-    UProjectileMovementComponent* ProjectileMovementComponent = SpawnedProjectile->ProjectileMovementComponent;
-    if (SpawnedProjectile && ProjectileMovementComponent)
+    if (SpawnedProjectile)
     {
-        ProjectileMovementComponent->Activate();
+        UProjectileMovementComponent* ProjectileMovementComponent = SpawnedProjectile->ProjectileMovementComponent;
+        if (ProjectileMovementComponent)
+        {
+            EDetachmentRule LocationRule = EDetachmentRule::KeepWorld;
+            EDetachmentRule RotationRule = EDetachmentRule::KeepWorld;
+            EDetachmentRule ScaleRule = EDetachmentRule::KeepWorld;
+            FDetachmentTransformRules DetachmentTransformRules(LocationRule, RotationRule, ScaleRule, true);
+            SpawnedProjectile->DetachFromActor(DetachmentTransformRules);
+
+
+            ProjectileMovementComponent->Activate();
+            FVector Forward = Character->GetActorForwardVector();
+            Forward *= 1000.0f;
+            Forward.Z += 80.0f;
+            ProjectileMovementComponent->Velocity = Forward;
+            ProjectileMovementComponent->ProjectileGravityScale = 0.05f;
+        }
     }
 }

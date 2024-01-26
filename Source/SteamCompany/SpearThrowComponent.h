@@ -11,7 +11,7 @@
 
 #include "SpearThrowComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpearDamageComplete, UCombatComponent*, OtherCombatComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpearThrown, ASpearProjectileActor*, Spear);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpearCooldownBegin, float, BiteCooldown);
 
 class UInputMappingContext;
@@ -65,7 +65,7 @@ public:
 
     // Delegate for damage events
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
-    FOnSpearDamageComplete OnDamageComplete;
+    FOnSpearThrown OnSpearThrown;
 
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
     FOnSpearCooldownBegin OnCooldownBegin;
