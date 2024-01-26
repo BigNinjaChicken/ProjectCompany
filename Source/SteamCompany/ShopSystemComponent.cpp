@@ -46,38 +46,57 @@ void UShopSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 void UShopSystemComponent::EndShop() {
 	OnEndDialog.Broadcast();
 
+	ServerResetMovementSpeed();
+
 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+	if (CharacterMovementComponent && StartingMaxWalkSpeed != 0) CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+	
+	FInputModeGameOnly InputModeGameOnly;
+	if (PlayerController) {
+		PlayerController->SetInputMode(InputModeGameOnly);
+		PlayerController->bShowMouseCursor = false;
+	}
+
 	GetWorld()->GetTimerManager().ClearTimer(CameraLerpTimerHandle);
 
+	if (CameraComponent) CameraComponent->bUsePawnControlRotation = true;
+}
+
+
+void UShopSystemComponent::ServerResetMovementSpeed_Implementation()
+{
+	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+	if (CharacterMovementComponent && StartingMaxWalkSpeed != 0) CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+
 	FInputModeGameOnly InputModeGameOnly;
-	PlayerController->SetInputMode(InputModeGameOnly);
-
-	CameraComponent->bUsePawnControlRotation = true;
-
-	PlayerController->bShowMouseCursor = false;
-
-	return;
+	if (PlayerController) {
+		PlayerController->SetInputMode(InputModeGameOnly);
+		PlayerController->bShowMouseCursor = false;
+	}
 }
 
 void UShopSystemComponent::Interact()
 {
-	if (bDoOnce) { return; }
-	bDoOnce = true;
+	if (bInShop) { return; }
+	bInShop = true;
 
 	if (ItemOptions.Num() == 0) {
 		UE_LOG(LogTemp, Warning, TEXT("No ItemOptions"));
 		return;
 	}
 
+	PlayerController = Cast<APlayerController>(Character->GetController());
 	FInputModeUIOnly InputModeUIOnly;
-	PlayerController->SetInputMode(InputModeUIOnly);
-
-	PlayerController->bShowMouseCursor = true;
+	if (PlayerController) {
+		PlayerController->SetInputMode(InputModeUIOnly);
+		PlayerController->bShowMouseCursor = true;
+	}
 
 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
 	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
 	CharacterMovementComponent->MaxWalkSpeed = 0.0f;
+	
+	SetInteractSettings();
 
 	LerpCameraToJester();
 
@@ -87,6 +106,20 @@ void UShopSystemComponent::Interact()
 	ItemsToPickFrom.AddUnique(ItemOptions[FMath::RandRange(0, ItemOptions.Num() - 1)]);
 
 	OnShopChange.Broadcast(ItemsToPickFrom);
+}
+
+void UShopSystemComponent::SetInteractSettings_Implementation()
+{
+	PlayerController = Cast<APlayerController>(Character->GetController());
+	FInputModeUIOnly InputModeUIOnly;
+	if (PlayerController) {
+		PlayerController->SetInputMode(InputModeUIOnly);
+		PlayerController->bShowMouseCursor = true;
+	}
+
+	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
+	CharacterMovementComponent->MaxWalkSpeed = 0.0f;
 }
 
 void UShopSystemComponent::LerpCameraToJester()

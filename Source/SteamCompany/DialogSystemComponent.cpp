@@ -2,17 +2,18 @@
 
 
 #include "DialogSystemComponent.h"
-#include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
-#include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/InputTriggers.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/PlayerController.h"
-#include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "EnhancedInputComponent.h"
+#include "InputTriggers.h"
+#include "GameFramework/PlayerController.h"
+#include "EnhancedInputSubsystems.h"
+#include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 #include "LevelAdvancedFriendsGameInstance.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "JesterActor.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Camera/CameraComponent.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
+#include "Camera/CameraComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h"
 
 UDialogSystemComponent::UDialogSystemComponent()
 {
@@ -52,11 +53,7 @@ void UDialogSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UDialogSystemComponent::BeginDialog()
 {
-	BeginDialog_Client();
-}
-
-void UDialogSystemComponent::BeginDialog_Client_Implementation()
-{
+	if (bInDialog) return;
 	bInDialog = true;
 
 	ULevelAdvancedFriendsGameInstance* GameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
@@ -77,6 +74,12 @@ void UDialogSystemComponent::BeginDialog_Client_Implementation()
 	Interact();
 }
 
+void UDialogSystemComponent::ServerResetMovementSpeed_Implementation()
+{
+	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+	CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+}
+
 void UDialogSystemComponent::Interact()
 {
 	if (!bInDialog) return;
@@ -90,8 +93,11 @@ void UDialogSystemComponent::Interact()
 	if (CurrentLineIndex == LevelDialog[CurrentLevel].Lines.Num()) {
 		OnEndDialog.Broadcast();
 
+		ServerResetMovementSpeed();
+
 		UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
 		CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+
 		GetWorld()->GetTimerManager().ClearTimer(CameraLerpTimerHandle);
 
 		CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
@@ -114,6 +120,9 @@ void UDialogSystemComponent::LerpCameraToJester()
 		return;
 	}
 
+	CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
+	CameraComponent->bUsePawnControlRotation = false;
+
 	GetWorld()->GetTimerManager().SetTimer(CameraLerpTimerHandle, this, &UDialogSystemComponent::UpdateCameraLerp, 0.01f, true);
 }
 
@@ -121,8 +130,6 @@ void UDialogSystemComponent::UpdateCameraLerp()
 {
 	float DeltaTime = GetWorld()->GetDeltaSeconds();
 
-	CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
-	CameraComponent->bUsePawnControlRotation = false;
 	if (!CameraComponent)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CameraComponent is not set"));

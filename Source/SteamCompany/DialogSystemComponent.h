@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Camera/CameraComponent.h"
+#include "Camera/CameraComponent.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
 #include "DialogSystemComponent.generated.h"
 
 class UInputMappingContext;
@@ -36,6 +37,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+
+public:
 	// Reference to Owner
     UPROPERTY()
     ACharacter* Character;
@@ -43,7 +46,6 @@ protected:
 	UPROPERTY()
 	APlayerController* PlayerController;
 
-public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -58,8 +60,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void BeginDialog();
 
-	UFUNCTION(Client, Reliable)
-	void BeginDialog_Client();
+	UFUNCTION(Server, Reliable)
+	void ServerResetMovementSpeed();
 
 	UFUNCTION()
 	void LerpCameraToJester();

@@ -61,16 +61,33 @@ void AShopActor::OnInteractHandler()
     TArray<AActor*> CharacterActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), CharacterActors);
 
+    AActor* ClosestCharacter = nullptr;
+    float MinDistance = FLT_MAX;
+
     for (AActor* CharacterActor : CharacterActors)
     {
         UCombatComponent* CombatComponent = Cast<UCombatComponent>(CharacterActor->GetComponentByClass(UCombatComponent::StaticClass()));
         if (CombatComponent && CombatComponent->bIsPlayer)
         {
-            UShopSystemComponent* ShopSystemComponent = Cast<UShopSystemComponent>(CharacterActor->GetComponentByClass(UShopSystemComponent::StaticClass()));
+            float Distance = FVector::Dist(CharacterActor->GetActorLocation(), this->GetActorLocation());
+            if (Distance < MinDistance)
+            {
+                MinDistance = Distance;
+                ClosestCharacter = CharacterActor;
+            }
+        }
+    }
+
+    if (ClosestCharacter)
+    {
+        UShopSystemComponent* ShopSystemComponent = Cast<UShopSystemComponent>(ClosestCharacter->GetComponentByClass(UShopSystemComponent::StaticClass()));
+        if (ShopSystemComponent)
+        {
             ShopSystemComponent->Interact();
         }
     }
 }
+
 
 void AShopActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

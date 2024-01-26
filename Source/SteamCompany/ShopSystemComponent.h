@@ -71,7 +71,13 @@ public:
 	UFUNCTION()
 	void Interact();
 
-	bool bDoOnce = false;
+	UFUNCTION(NetMulticast, Reliable)
+	void SetInteractSettings();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ServerResetMovementSpeed();
+
+	bool bInShop = false;
 
 	int32 CurrentLineIndex = 0;
 	int32 CurrentLevel = 0;
