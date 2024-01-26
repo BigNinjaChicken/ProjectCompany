@@ -8,6 +8,8 @@
 #include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
 #include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
+#include "SpearProjectileActor.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/ProjectileMovementComponent.h"
 
 USpearThrowComponent::USpearThrowComponent()
 {
@@ -86,44 +88,22 @@ void USpearThrowComponent::Attack()
     FTimerHandle CooldownTimerHandle;
     GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &USpearThrowComponent::CooldownComplete, CooldownTime, false);
 
-    FVector BiteLocation = Character->GetActorLocation(); // You might want to adjust this location
-    float BiteRadius = 300.0f; // Set the radius for the bite sphere
-
-    TArray<AActor*> OverlappedActors;
-    TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes; // Define object types to overlap with
-    //     ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn)); // Overlap with other pawns
-
-    TArray<AActor*> ActorsToIgnore;
-    ActorsToIgnore.Add(Character); // Ignore the character itself
-
-    bool bOverlap = UKismetSystemLibrary::SphereOverlapActors(
-        this,
-        BiteLocation,
-        BiteRadius,
-        ObjectTypes,
-        nullptr,
-        ActorsToIgnore,
-        OverlappedActors
-    );
-
-    /*Optional: Draw Debug Sphere for visual feedback*/
-#if WITH_EDITOR
-    DrawDebugSphere(GetWorld(), BiteLocation, BiteRadius, 32, FColor::Red, false, 2.0f);
-#endif
-
-    UCombatComponent* OtherCombatComp = nullptr;
-    if (bOverlap)
+    if (!SpearProjectileActor)
     {
-        for (AActor* OtherActor : OverlappedActors)
-        {
-            OtherCombatComp = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
-            if (OtherCombatComp) {
-                ServerRequestDamage(OtherCombatComp, Damage * CombatComp->StrengthMultiplier);
-                CombatComp->EnterCombat();
-                OnDamageComplete.Broadcast(OtherCombatComp);
-            }
-        }
+        UE_LOG(LogTemp, Warning, TEXT("No SpearProjectileActor"));
+        return;
     }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.Owner = GetOwner();
+    SpawnParams.Instigator = Character;
+
+    FVector SpawnLocation = Character->GetActorLocation();
+    FRotator SpawnRotation = Character->GetActorRotation();
+
+    SpawnedProjectile = GetWorld()->SpawnActor<ASpearProjectileActor>(SpearProjectileActor, SpawnLocation, SpawnRotation, SpawnParams);
+
+    GetWorld()->GetTimerManager().SetTimer(ProjectileMovementTimerHandle, this, &USpearThrowComponent::StartProjectileMovement, 1.0, false);
 }
 
 void USpearThrowComponent::CooldownComplete()
@@ -136,5 +116,14 @@ void USpearThrowComponent::ServerRequestDamage_Implementation(UCombatComponent* 
     if (OtherCombatComp && OtherCombatComp->GetOwner()->HasAuthority())
     {
         OtherCombatComp->ServerTakeDamage(DamageAmount);
+    }
+}
+
+void USpearThrowComponent::StartProjectileMovement()
+{
+    UProjectileMovementComponent* ProjectileMovementComponent = SpawnedProjectile->ProjectileMovementComponent;
+    if (SpawnedProjectile && ProjectileMovementComponent)
+    {
+        ProjectileMovementComponent->Activate();
     }
 }

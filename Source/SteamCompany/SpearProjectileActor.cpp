@@ -30,7 +30,9 @@ ASpearProjectileActor::ASpearProjectileActor()
 void ASpearProjectileActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+    ArrowTipBoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ASpearProjectileActor::OnArrowTipOverlap);
+
 }
 
 // Called every frame
@@ -38,5 +40,10 @@ void ASpearProjectileActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ASpearProjectileActor::OnArrowTipOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+   // ProjectileMovementComponent->StopMovementImmediately();
 }
 

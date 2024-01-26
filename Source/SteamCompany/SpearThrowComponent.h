@@ -7,6 +7,7 @@
 #include "Components/ActorComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "CombatComponent.h"
+#include "SpearProjectileActor.h"
 
 #include "SpearThrowComponent.generated.h"
 
@@ -17,6 +18,7 @@ class UInputMappingContext;
 class UInputAction;
 class ACharacter;
 class UCombatComponent;
+class ASpearProjectileActor;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STEAMCOMPANY_API USpearThrowComponent : public UActorComponent
@@ -57,6 +59,7 @@ public:
     UFUNCTION(BlueprintCallable)
 	void Attack();
 
+    void OnArrowTipOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     float CooldownTime = 2.0f;
 
@@ -76,4 +79,15 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     float Damage = 10.0f;
+
+    // Timer handle for delayed projectile movement
+    FTimerHandle ProjectileMovementTimerHandle;
+
+    UFUNCTION(BlueprintCallable)
+    void StartProjectileMovement();
+
+    ASpearProjectileActor* SpawnedProjectile;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    TSubclassOf<ASpearProjectileActor> SpearProjectileActor;
 };
