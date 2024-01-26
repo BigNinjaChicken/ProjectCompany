@@ -86,44 +86,15 @@ void UForwardSlashComponent::Attack()
     FTimerHandle CooldownTimerHandle;
     GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &UForwardSlashComponent::CooldownComplete, CooldownTime, false);
 
-    FVector BiteLocation = Character->GetActorLocation(); // You might want to adjust this location
-    float BiteRadius = 300.0f; // Set the radius for the bite sphere
+    
 
-    TArray<AActor*> OverlappedActors;
-    TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes; // Define object types to overlap with
-    //     ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn)); // Overlap with other pawns
 
-    TArray<AActor*> ActorsToIgnore;
-    ActorsToIgnore.Add(Character); // Ignore the character itself
-
-    bool bOverlap = UKismetSystemLibrary::SphereOverlapActors(
-        this,
-        BiteLocation,
-        BiteRadius,
-        ObjectTypes,
-        nullptr,
-        ActorsToIgnore,
-        OverlappedActors
-    );
-
-    /*Optional: Draw Debug Sphere for visual feedback*/
-#if WITH_EDITOR
-	DrawDebugSphere(GetWorld(), BiteLocation, BiteRadius, 32, FColor::Red, false, 2.0f);
-#endif
-
-    UCombatComponent* OtherCombatComp = nullptr;
-    if (bOverlap)
-    {
-        for (AActor* OtherActor : OverlappedActors)
-        {
-            OtherCombatComp = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
-            if (OtherCombatComp) {
-                ServerRequestDamage(OtherCombatComp, Damage * CombatComp->StrengthMultiplier);
-                CombatComp->EnterCombat();
-                OnDamageComplete.Broadcast(OtherCombatComp);
-            }
-        }
-    }
+//         UCombatComponent*  OtherCombatComp = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
+//         if (OtherCombatComp) {
+//             ServerRequestDamage(OtherCombatComp, Damage * CombatComp->StrengthMultiplier);
+//             CombatComp->EnterCombat();
+//             OnDamageComplete.Broadcast(OtherCombatComp);
+//         }
 }
 
 void UForwardSlashComponent::CooldownComplete()
