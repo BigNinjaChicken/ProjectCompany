@@ -107,7 +107,7 @@ void UDashAbilityComponent::Dash_Server_Implementation()
     FRotator ControlRotation = PlayerPawn->GetControlRotation();
     FVector DashDirection = ControlRotation.Vector();
     DashDirection.Normalize();
-    MovementComponent->Velocity += DashDirection * DashStrength;
+    Character->LaunchCharacter(DashDirection * DashStrength, false, false);
 
     CombatComp->SetInvincible(InvincibilityTime);
 

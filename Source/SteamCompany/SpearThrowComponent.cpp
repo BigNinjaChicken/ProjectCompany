@@ -109,7 +109,7 @@ void USpearThrowComponent::Attack()
     // Log spawn location and rotation
     UE_LOG(LogTemp, Log, TEXT("Spawn Location: %s, Spawn Rotation: %s"), *SpawnLocation.ToString(), *SpawnRotation.ToString());
 
-    SpawnedProjectile = GetWorld()->SpawnActor<ASpearProjectileActor>(SpearProjectileActor, SpawnLocation, SpawnRotation, SpawnParams);
+    SpawnedProjectile = GetWorld()->SpawnActor<ASpearProjectileActor>(SpearProjectileActor, SpawnLocation + SpawnOffset, SpawnRotation, SpawnParams);
     if (!SpawnedProjectile) {
         UE_LOG(LogTemp, Warning, TEXT("Failed to spawn projectile"));
         return;
@@ -136,7 +136,7 @@ void USpearThrowComponent::Attack()
         UE_LOG(LogTemp, Warning, TEXT("Character invalid when attempting to attach projectile"));
     }
 
-    GetWorld()->GetTimerManager().SetTimer(ProjectileMovementTimerHandle, this, &USpearThrowComponent::StartProjectileMovement, 0.54f, false);
+    GetWorld()->GetTimerManager().SetTimer(ProjectileMovementTimerHandle, this, &USpearThrowComponent::StartProjectileMovement, SpearDelay, false);
 }
 
 
