@@ -109,4 +109,6 @@ void UDashAbilityComponent::Dash_Server_Implementation()
     DashDirection.Normalize();
     MovementComponent->Velocity += DashDirection * DashStrength;
 
+    CombatComp->SetInvincible(InvincibilityTime);
+
 }

@@ -71,6 +71,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     float DashStrength = 100.0f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    float InvincibilityTime = 1.0f;
+
     UFUNCTION()
     void OnRep_BiteDamageComplete() {}
 };
