@@ -37,6 +37,10 @@ void UCombatComponent::ServerTakeDamage_Implementation(float DamageAmount)
         return;
     }
 
+    if (bIsInvincible) {
+        return;
+    }
+
     Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
     if (Health <= 0)
     {
@@ -82,6 +86,35 @@ void UCombatComponent::EndCombat()
         bInCombat = false;
         OnOutOfCombat.Broadcast();
     }
+}
+
+void UCombatComponent::SetInvincible(float Sec)
+{
+    if (!GetOwner()->HasAuthority())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("!GetOwner()->HasAuthority()"));
+        return;
+    }
+
+    if (Sec <= 0.0f)
+    {
+        // If duration is not positive, do not set invincible
+        return;
+    }
+
+    bIsInvincible = true;
+
+    // Clear any previous invincible timers
+    GetWorld()->GetTimerManager().ClearTimer(InvincibleTimerHandle);
+
+    // Set a timer to reset invincibility after the specified duration
+    GetWorld()->GetTimerManager().SetTimer(InvincibleTimerHandle, this, &UCombatComponent::ResetInvincibility, Sec, false);
+}
+
+
+void UCombatComponent::ResetInvincibility()
+{
+    bIsInvincible = false;
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

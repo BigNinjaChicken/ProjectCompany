@@ -69,5 +69,15 @@ public:
     FTimerHandle CombatTimerHandle;
     void EnterCombat();
     void EndCombat();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+    bool bIsInvincible = false;
+
+    FTimerHandle InvincibleTimerHandle;
+
+    // Declare the SetInvincible function
+    UFUNCTION(BlueprintCallable)
+    void SetInvincible(float Sec);
+    void ResetInvincibility();
 };
 
