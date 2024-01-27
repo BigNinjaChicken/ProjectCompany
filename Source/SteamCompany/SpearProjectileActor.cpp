@@ -49,17 +49,25 @@ void ASpearProjectileActor::OnArrowTipOverlap(UPrimitiveComponent* OverlappedCom
     // Log the name of the other actor
     if (OtherActor->IsA(ASpearProjectileActor::StaticClass())) return;
 
-    UCombatComponent* CombatComponent = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
-    if (CombatComponent && CombatComponent->bIsPlayer) {
-        CombatComponent->ServerTakeDamage(20.0f);
-        Destroy();
+    if (OtherActor == GetOwner()) return;
+
+    UCombatComponent* OwnerCombatComponent = Cast<UCombatComponent>(GetOwner()->GetComponentByClass(UCombatComponent::StaticClass()));
+    UCombatComponent* OtherCombatComponent = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
+    if (OtherCombatComponent) {
+        if ((OtherCombatComponent->bIsPlayer && !OwnerCombatComponent->bIsPlayer) || 
+            (!OtherCombatComponent->bIsPlayer && OwnerCombatComponent->bIsPlayer)) {
+            OtherCombatComponent->ServerTakeDamage(20.0f);
+            Destroy();
+        }
     }
 
-    if (CombatComponent) return;
+    if (OtherCombatComponent) return;
 
     ProjectileMovementComponent->StopMovementImmediately();
     ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 
     ArrowTipBoxComponent->OnComponentBeginOverlap.RemoveDynamic(this, &ASpearProjectileActor::OnArrowTipOverlap);
+
+    OnSpearInWall.Broadcast();
 }
 

@@ -90,4 +90,6 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     TSubclassOf<ASpearProjectileActor> SpearProjectileActor;
+
+  
 };
