@@ -36,4 +36,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	FString ItemName = "Null Item";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	FString ItemDesc = "Null Item";
 };
