@@ -59,6 +59,9 @@ public:
     UFUNCTION(BlueprintCallable)
 	void Attack();
 
+    UFUNCTION(Server, Reliable)
+    void SpawnSpear();
+
     void OnArrowTipOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     float CooldownTime = 2.0f;
@@ -97,7 +100,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     TSubclassOf<ASpearProjectileActor> SpearProjectileActor;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input", Replicated)
     bool bIsThrowing = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")

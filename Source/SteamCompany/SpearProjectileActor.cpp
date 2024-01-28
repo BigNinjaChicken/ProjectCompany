@@ -56,7 +56,7 @@ void ASpearProjectileActor::OnArrowTipOverlap(UPrimitiveComponent* OverlappedCom
     if (OtherCombatComponent) {
         if ((OtherCombatComponent->bIsPlayer && !OwnerCombatComponent->bIsPlayer) || 
             (!OtherCombatComponent->bIsPlayer && OwnerCombatComponent->bIsPlayer)) {
-            OtherCombatComponent->ServerTakeDamage(Damage);
+            ServerRequestDamage(OtherCombatComponent, Damage);
             Destroy();
         }
     }
@@ -71,3 +71,10 @@ void ASpearProjectileActor::OnArrowTipOverlap(UPrimitiveComponent* OverlappedCom
     OnSpearInWall.Broadcast();
 }
 
+void ASpearProjectileActor::ServerRequestDamage_Implementation(UCombatComponent* OtherCombatComp, float DamageAmount)
+{
+    if (OtherCombatComp && OtherCombatComp->GetOwner()->HasAuthority())
+    {
+        OtherCombatComp->ServerTakeDamage(DamageAmount);
+    }
+}

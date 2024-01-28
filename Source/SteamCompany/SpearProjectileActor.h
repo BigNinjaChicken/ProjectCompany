@@ -50,4 +50,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	float Damage = 20.0f;
+
+	 UFUNCTION(Server, Reliable)
+    void ServerRequestDamage(UCombatComponent* OtherCombatComp, float DamageAmount);
 };

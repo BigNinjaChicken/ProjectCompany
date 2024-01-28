@@ -70,6 +70,7 @@ void USpearThrowComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty 
 
     DOREPLIFETIME(USpearThrowComponent, OnSpearThrown);
     DOREPLIFETIME(USpearThrowComponent, OnCooldownBegin);
+    DOREPLIFETIME(USpearThrowComponent, bIsThrowing);
 }
 
 void USpearThrowComponent::Attack()
@@ -92,53 +93,59 @@ void USpearThrowComponent::Attack()
     FTimerHandle CooldownTimerHandle;
     GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &USpearThrowComponent::CooldownComplete, CooldownTime, false);
 
-    if (!SpearProjectileActor)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("No SpearProjectileActor"));
-        return;
-    }
-
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.Owner = GetOwner();
-    SpawnParams.Instigator = Character;
-    SpawnParams.bNoFail = true;
-
-    FVector SpawnLocation = Character->GetActorLocation();
-    FRotator SpawnRotation = Character->GetActorRotation();
-
-    // Log spawn location and rotation
-    UE_LOG(LogTemp, Log, TEXT("Spawn Location: %s, Spawn Rotation: %s"), *SpawnLocation.ToString(), *SpawnRotation.ToString());
-
-    SpawnedProjectile = GetWorld()->SpawnActor<ASpearProjectileActor>(SpearProjectileActor, SpawnLocation + SpawnOffset, SpawnRotation, SpawnParams);
-    if (!SpawnedProjectile) {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to spawn projectile"));
-        return;
-    }
-
-    // Confirm projectile spawning
-    UE_LOG(LogTemp, Log, TEXT("Projectile spawned successfully"));
-
-    OnSpearThrown.Broadcast(SpawnedProjectile);
-
-    EAttachmentRule LocationRule = EAttachmentRule::SnapToTarget;
-    EAttachmentRule RotationRule = EAttachmentRule::KeepRelative;
-    EAttachmentRule ScaleRule = EAttachmentRule::KeepWorld;
-    FAttachmentTransformRules AttachmentTransformRules(LocationRule, RotationRule, ScaleRule, false);
-
-    // Checking if Character is still valid before attaching
-    if (Character) {
-        SpawnedProjectile->AttachToComponent(Character->GetMesh(), AttachmentTransformRules, AttachName);
-        // Log attachment
-        UE_LOG(LogTemp, Log, TEXT("Projectile attached to %s"), *AttachName.ToString());
-    }
-    else {
-        UE_LOG(LogTemp, Warning, TEXT("Character invalid when attempting to attach projectile"));
-    }
-
-    bIsThrowing = true;
-    GetWorld()->GetTimerManager().SetTimer(ProjectileMovementTimerHandle, this, &USpearThrowComponent::StartProjectileMovement, SpearDelay, false);
+    SpawnSpear();
+    return;
 }
 
+
+void USpearThrowComponent::SpawnSpear_Implementation()
+{
+	if (!SpearProjectileActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No SpearProjectileActor"));
+		return;
+	}
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = GetOwner();
+	SpawnParams.Instigator = Character;
+	SpawnParams.bNoFail = true;
+
+	FVector SpawnLocation = Character->GetActorLocation();
+	FRotator SpawnRotation = Character->GetActorRotation();
+
+	// Log spawn location and rotation
+	UE_LOG(LogTemp, Log, TEXT("Spawn Location: %s, Spawn Rotation: %s"), *SpawnLocation.ToString(), *SpawnRotation.ToString());
+
+	SpawnedProjectile = GetWorld()->SpawnActor<ASpearProjectileActor>(SpearProjectileActor, SpawnLocation + SpawnOffset, SpawnRotation, SpawnParams);
+	if (!SpawnedProjectile) {
+		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn projectile"));
+		return;
+	}
+
+	// Confirm projectile spawning
+	UE_LOG(LogTemp, Log, TEXT("Projectile spawned successfully"));
+
+	OnSpearThrown.Broadcast(SpawnedProjectile);
+
+	EAttachmentRule LocationRule = EAttachmentRule::SnapToTarget;
+	EAttachmentRule RotationRule = EAttachmentRule::KeepRelative;
+	EAttachmentRule ScaleRule = EAttachmentRule::KeepWorld;
+	FAttachmentTransformRules AttachmentTransformRules(LocationRule, RotationRule, ScaleRule, false);
+
+	// Checking if Character is still valid before attaching
+	if (Character) {
+		SpawnedProjectile->AttachToComponent(Character->GetMesh(), AttachmentTransformRules, AttachName);
+		// Log attachment
+		UE_LOG(LogTemp, Log, TEXT("Projectile attached to %s"), *AttachName.ToString());
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Character invalid when attempting to attach projectile"));
+	}
+
+	bIsThrowing = true;
+	GetWorld()->GetTimerManager().SetTimer(ProjectileMovementTimerHandle, this, &USpearThrowComponent::StartProjectileMovement, SpearDelay, false);
+}
 
 void USpearThrowComponent::CooldownComplete()
 {
