@@ -105,9 +105,13 @@ void UDashAbilityComponent::Dash_Server_Implementation()
     }
 
     FRotator ControlRotation = PlayerPawn->GetControlRotation();
-    FVector DashDirection = ControlRotation.Vector();
-    DashDirection.Normalize();
-    Character->LaunchCharacter(DashDirection * DashStrength, false, false);
+    FVector Velocity = Character->GetVelocity();
+    bool bHasVelocity = Velocity.Normalize();  // Normalize the velocity vector in place and check if it's not a zero vector.
+
+    if (bHasVelocity)
+    {
+        Character->LaunchCharacter(Velocity * DashStrength, false, false);
+    }
 
     CombatComp->SetInvincible(InvincibilityTime);
 
