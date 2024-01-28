@@ -8,7 +8,7 @@
 #include "Components/ActorComponent.h"
 #include "PauseComponent.generated.h"
 
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResumeButtonClicked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResumeButtonClicked);
 
 class UInputMappingContext;
 class UInputAction;
@@ -51,12 +51,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PauseGame();
 
-	// UFUNCTION(BlueprintCallable)
-	// void ResumeGame();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	TSubclassOf<UUserWidget> PauseWidget;
-
-	// UPROPERTY(BlueprintAssignable)
-	// FOnResumeButtonClicked OnResumeButtonClicked;
+	UPROPERTY(BlueprintAssignable)
+	FOnResumeButtonClicked OnResumeButtonClicked;
 };

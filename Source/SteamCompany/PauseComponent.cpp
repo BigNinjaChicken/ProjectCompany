@@ -79,18 +79,6 @@ void UPauseComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 void UPauseComponent::PauseGame()
 {
-	Cast<UUserWidget>(PauseWidget)->AddToViewport();
-	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
-	{
-		PlayerController->SetShowMouseCursor(true);
-		FInputModeUIOnly uiOnly;
-		PlayerController->SetInputMode(uiOnly);
-		//UGameplayStatics::SetGamePaused(GetWorld(),true);
-	}
+	OnResumeButtonClicked.Broadcast();
 }
-
-// void UPauseComponent::ResumeGame()
-// {
-// 	
-// }
 
