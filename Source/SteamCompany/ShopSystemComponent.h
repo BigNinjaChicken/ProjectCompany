@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Camera/CameraComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "ShopSystemComponent.generated.h"
 
 class UInputMappingContext;
@@ -77,12 +78,19 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void ServerResetMovementSpeed();
 
+	UFUNCTION(Server, Reliable)
+	void GetStartingSpeed();
+
+	// Replication setup
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+
 	bool bInShop = false;
 
 	int32 CurrentLineIndex = 0;
 	int32 CurrentLevel = 0;
 
-	float StartingMaxWalkSpeed;
+	UPROPERTY(Replicated)
+	float StartingMaxWalkSpeed = 100.0f;
 
 	UCameraComponent* CameraComponent;
 
