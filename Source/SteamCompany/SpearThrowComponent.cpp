@@ -124,18 +124,18 @@ void USpearThrowComponent::Attack()
     EAttachmentRule RotationRule = EAttachmentRule::KeepRelative;
     EAttachmentRule ScaleRule = EAttachmentRule::KeepWorld;
     FAttachmentTransformRules AttachmentTransformRules(LocationRule, RotationRule, ScaleRule, false);
-    FName Name = "DEF-hand_RSocket";
 
     // Checking if Character is still valid before attaching
     if (Character) {
-        SpawnedProjectile->AttachToComponent(Character->GetMesh(), AttachmentTransformRules, Name);
+        SpawnedProjectile->AttachToComponent(Character->GetMesh(), AttachmentTransformRules, AttachName);
         // Log attachment
-        UE_LOG(LogTemp, Log, TEXT("Projectile attached to %s"), *Name.ToString());
+        UE_LOG(LogTemp, Log, TEXT("Projectile attached to %s"), *AttachName.ToString());
     }
     else {
         UE_LOG(LogTemp, Warning, TEXT("Character invalid when attempting to attach projectile"));
     }
 
+    bIsThrowing = true;
     GetWorld()->GetTimerManager().SetTimer(ProjectileMovementTimerHandle, this, &USpearThrowComponent::StartProjectileMovement, SpearDelay, false);
 }
 
@@ -160,6 +160,8 @@ void USpearThrowComponent::StartProjectileMovement()
         UProjectileMovementComponent* ProjectileMovementComponent = SpawnedProjectile->ProjectileMovementComponent;
         if (ProjectileMovementComponent)
         {
+            bIsThrowing = false;
+
             EDetachmentRule LocationRule = EDetachmentRule::KeepWorld;
             EDetachmentRule RotationRule = EDetachmentRule::KeepWorld;
             EDetachmentRule ScaleRule = EDetachmentRule::KeepWorld;

@@ -97,5 +97,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     TSubclassOf<ASpearProjectileActor> SpearProjectileActor;
 
-  
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    bool bIsThrowing = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
+	FName AttachName = "ORG-palm_01_R";
 };
