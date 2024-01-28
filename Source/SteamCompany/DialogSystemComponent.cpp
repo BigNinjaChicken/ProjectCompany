@@ -54,7 +54,6 @@ void UDialogSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UDialogSystemComponent::BeginDialog()
 {
 	if (bInDialog) return;
-	bInDialog = true;
 
 	ULevelAdvancedFriendsGameInstance* GameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	CurrentLevel = GameInstance->CurrentLevel;
@@ -72,6 +71,8 @@ void UDialogSystemComponent::BeginDialog()
 	LerpCameraToJester();
 
 	Interact();
+
+	bInDialog = true;
 }
 
 void UDialogSystemComponent::ServerResetMovementSpeed_Implementation()
