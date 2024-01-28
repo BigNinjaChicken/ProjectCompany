@@ -64,15 +64,18 @@ void UDialogSystemComponent::BeginDialog()
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Started Dialog"));
+
 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
 	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
 	CharacterMovementComponent->MaxWalkSpeed = 0.0f;
 
 	LerpCameraToJester();
 
+	bInDialog = true;
+
 	Interact();
 
-	bInDialog = true;
 }
 
 void UDialogSystemComponent::ServerResetMovementSpeed_Implementation()

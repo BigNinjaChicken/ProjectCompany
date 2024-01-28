@@ -36,6 +36,8 @@ void UShopSystemComponent::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("PlayerController null"));
 		return;
 	}
+
+	GetStartingSpeed();
 }
 
 void UShopSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -66,13 +68,31 @@ void UShopSystemComponent::EndShop() {
 void UShopSystemComponent::ServerResetMovementSpeed_Implementation()
 {
 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	if (CharacterMovementComponent && StartingMaxWalkSpeed != 0) CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+	if (CharacterMovementComponent && StartingMaxWalkSpeed != 0) {
+
+		UE_LOG(LogTemp, Warning, TEXT("Here1"));
+		CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+	}
 
 	FInputModeGameOnly InputModeGameOnly;
 	if (PlayerController) {
 		PlayerController->SetInputMode(InputModeGameOnly);
 		PlayerController->bShowMouseCursor = false;
 	}
+}
+
+void UShopSystemComponent::GetStartingSpeed_Implementation()
+{
+
+	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
+}
+
+void UShopSystemComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UShopSystemComponent, StartingMaxWalkSpeed);
 }
 
 void UShopSystemComponent::Interact()
@@ -91,9 +111,7 @@ void UShopSystemComponent::Interact()
 		PlayerController->SetInputMode(InputModeUIOnly);
 		PlayerController->bShowMouseCursor = true;
 	}
-
 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
 	CharacterMovementComponent->MaxWalkSpeed = 0.0f;
 	
 	SetInteractSettings();
