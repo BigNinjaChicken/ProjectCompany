@@ -74,7 +74,13 @@ public:
     float SpearDelay = 0.54f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    float GravityScale = 0.54f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     FVector SpawnOffset = FVector(0, 0, 0);
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    float ThrowPowerMultiplier = 1;
 
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
     FOnSpearCooldownBegin OnCooldownBegin;
