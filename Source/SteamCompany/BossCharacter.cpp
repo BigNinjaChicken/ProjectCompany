@@ -42,8 +42,6 @@ void ABossCharacter::HandleActorDead()
     }
 
     OnBossDead.Broadcast();
-
-    Destroy();
 }
 
 void ABossCharacter::Tick(float DeltaTime)
