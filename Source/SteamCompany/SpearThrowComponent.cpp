@@ -180,8 +180,8 @@ void USpearThrowComponent::StartProjectileMovement()
             FVector Forward = Character->GetActorForwardVector();
             Forward *= 1000.0f;
             Forward.Z += 80.0f;
-            ProjectileMovementComponent->Velocity = Forward;
-            ProjectileMovementComponent->ProjectileGravityScale = 0.05f;
+            ProjectileMovementComponent->Velocity = Forward * ThrowPowerMultiplier;
+            ProjectileMovementComponent->ProjectileGravityScale = GravityScale;
         }
     }
 }
