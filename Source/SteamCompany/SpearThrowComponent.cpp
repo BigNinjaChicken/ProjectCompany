@@ -165,7 +165,7 @@ void USpearThrowComponent::StartProjectileMovement()
             EDetachmentRule ScaleRule = EDetachmentRule::KeepWorld;
             FDetachmentTransformRules DetachmentTransformRules(LocationRule, RotationRule, ScaleRule, true);
             SpawnedProjectile->DetachFromActor(DetachmentTransformRules);
-
+            SpawnedProjectile->AddActorWorldOffset(SpawnOffset, false);
 
             ProjectileMovementComponent->Activate();
             FVector Forward = Character->GetActorForwardVector();
