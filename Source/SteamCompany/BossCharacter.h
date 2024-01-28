@@ -39,4 +39,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
 	TArray<TSubclassOf<AItemPickupActor>> DropedItemPossibilites;
+
+	bool bHasDroppedItem = false;
 };

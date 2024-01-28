@@ -6,6 +6,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Engine/World.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Actor.h"
+#include "LevelAdvancedFriendsGameInstance.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 // Sets default values
 ABossEventActor::ABossEventActor()
@@ -38,11 +40,15 @@ void ABossEventActor::BeginBossEvent()
 
 void ABossEventActor::SpawnBoss()
 {
-	if (!BossCharacter)
+	if (BossCharacters.Num() == 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Chosen Boss Character"));
 		return;
 	}
+
+	int32 CurrentLevel = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()))->CurrentLevel;
+
+	TSubclassOf<ABossCharacter> BossCharacter = BossCharacters[FMath::Clamp(CurrentLevel / 3, 0, BossCharacters.Num() - 1)];
 
 	FTransform SpawnTransform = GetActorTransform();
 	ABossCharacter* SpawnedBossCharacter = GetWorld()->SpawnActor<ABossCharacter>(BossCharacter, SpawnTransform);

@@ -57,7 +57,7 @@ public:
 	void SpawnBossEvent();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
-	TSubclassOf<ABossCharacter> BossCharacter;
+	TArray<TSubclassOf<ABossCharacter>> BossCharacters;
 
 	// Delay in seconds before spawning the boss
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")

@@ -31,6 +31,10 @@ void ABossCharacter::HandleActorDead()
         UE_LOG(LogTemp, Warning, TEXT("Owner is not ACharacter"));
         return;
     }
+
+    if (bHasDroppedItem) {
+        return;
+    }
     
     int32 RandomIndex = UKismetMathLibrary::RandomIntegerInRange(0, DropedItemPossibilites.Num() - 1);
     TSubclassOf<AItemPickupActor> ItemActorToSpawn = DropedItemPossibilites[RandomIndex];
@@ -39,6 +43,7 @@ void ABossCharacter::HandleActorDead()
         FActorSpawnParameters SpawnParameters;
         SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         AItemPickupActor* SpawnedActor = GetWorld()->SpawnActor<AItemPickupActor>(ItemActorToSpawn, GetActorLocation(), GetActorRotation(), SpawnParameters);
+        bHasDroppedItem = true;
     }
 
     OnBossDead.Broadcast();
