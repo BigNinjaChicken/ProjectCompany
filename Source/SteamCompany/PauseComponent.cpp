@@ -1,0 +1,96 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "PauseComponent.h"
+
+#include "EnhancedInputSubsystems.h"
+#include "CombatComponent.h"
+#include "EnhancedInputComponent.h"
+#include "Blueprint/UserWidget.h"
+//#include "Components/Button.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
+
+
+// Sets default values for this component's properties
+UPauseComponent::UPauseComponent()
+{
+	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+	// off to improve performance if you don't need them.
+	PrimaryComponentTick.bCanEverTick = true;
+
+	// ...
+}
+
+
+// Called when the game starts
+void UPauseComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//OnResumeButtonClicked.Broadcast();
+	//Cast<UButton>(Cast<UUserWidget>(PauseWidget)->GetWidgetFromName("ResumeButton"))->OnClicked.Add(UPauseComponent::ResumeGame);
+
+	// Attempt to find the CombatComponent on the same actor
+	CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>();
+	if (!CombatComp)
+	{
+		// Handle the case where no CombatComponent is found
+		UE_LOG(LogTemp, Warning, TEXT("Requires a CombatComponent on the same actor!"));
+		return;
+	}
+
+	// Attempt to find Owner Character
+	Character = Cast<ACharacter>(GetOwner());
+	if (!Character)
+	{
+		// Handle the case where no CombatComponent is found
+		UE_LOG(LogTemp, Warning, TEXT("Owner is not ACharacter"));
+		return;
+	}
+
+	// ...
+	// Set up action bindings
+	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Pause action when using touch input
+			Subsystem->AddMappingContext(PauseMappingContext, 1);
+		}
+
+		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+		{
+			// Bind PauseGame to pause action
+			EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &UPauseComponent::PauseGame);
+		}
+	}
+}
+
+
+// Called every frame
+void UPauseComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// ...
+}
+
+void UPauseComponent::PauseGame()
+{
+	Cast<UUserWidget>(PauseWidget)->AddToViewport();
+	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
+	{
+		PlayerController->SetShowMouseCursor(true);
+		FInputModeUIOnly uiOnly;
+		PlayerController->SetInputMode(uiOnly);
+		//UGameplayStatics::SetGamePaused(GetWorld(),true);
+	}
+}
+
+// void UPauseComponent::ResumeGame()
+// {
+// 	
+// }
+
