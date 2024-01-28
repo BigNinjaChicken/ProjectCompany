@@ -67,6 +67,12 @@ public:
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
     FOnSpearThrown OnSpearThrown;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    float SpearDelay = 0.54f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    FVector SpawnOffset = FVector(0, 0, 0);
+
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
     FOnSpearCooldownBegin OnCooldownBegin;
 

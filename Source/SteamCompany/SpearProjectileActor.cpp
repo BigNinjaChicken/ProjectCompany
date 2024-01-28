@@ -56,7 +56,7 @@ void ASpearProjectileActor::OnArrowTipOverlap(UPrimitiveComponent* OverlappedCom
     if (OtherCombatComponent) {
         if ((OtherCombatComponent->bIsPlayer && !OwnerCombatComponent->bIsPlayer) || 
             (!OtherCombatComponent->bIsPlayer && OwnerCombatComponent->bIsPlayer)) {
-            OtherCombatComponent->ServerTakeDamage(20.0f);
+            OtherCombatComponent->ServerTakeDamage(Damage);
             Destroy();
         }
     }
