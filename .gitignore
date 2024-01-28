@@ -51,6 +51,7 @@ Plugins/*/Binaries/*
 
 # Builds
 Build/*
+PackagedGame/*
 
 Content/Gussy/ModularGothicFantasyEnvironment/Maps/*
 
