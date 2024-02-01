@@ -75,3 +75,7 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+Content/Frazier/Creative/LevelTiles/GussyTiles/Level_Expo.umap
+Content/Frazier/Creative/LevelTiles/GussyTiles/LV_Corner_1.umap
+Content/Frazier/Creative/LevelTiles/GussyTiles/LV_EndCap_2.umap
+Content/Frazier/Creative/LevelTiles/Level_Expo.umap
