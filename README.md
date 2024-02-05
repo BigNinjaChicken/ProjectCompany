@@ -2,7 +2,9 @@
 Unreal Engine 5.3 C++ Project submitted to the Global Game Jam with the theme **"Make Me Laugh."**
 
 ### Usefull Links
+
 [Pursuit Of Laughter GGJ 2024](https://globalgamejam.org/games/2024/pursuit-laughter-3-0 "Pursuit Of Laughter GGJ 2024")
+
 [Pursuit Of Laughter Itch.io Page](https://bigninjachicken.itch.io/pursuit-of-laughter "Pursuit Of Laughter Itch.io Page")
 
 ### Repo Notes
