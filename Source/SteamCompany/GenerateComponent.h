@@ -66,6 +66,9 @@ public:
 	TArray<TSoftObjectPtr<UWorld>> FourWayIntersectionLevels;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	TArray<TSoftObjectPtr<UWorld>> BigFourWayIntersectionLevels;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> ThreeWayIntersectionLevels;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
@@ -79,6 +82,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> ChurchFourWayIntersectionLevels;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	TArray<TSoftObjectPtr<UWorld>> ChurchBigFourWayIntersectionLevels;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TArray<TSoftObjectPtr<UWorld>> ChurchThreeWayIntersectionLevels;

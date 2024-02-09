@@ -106,6 +106,17 @@ void AGenerateLevelActor::OnBeginGenerateLevel()
 				LoadLevelAtPosition(World, FourWayIntersectionLevels[LevelIndex], Position, Rotation);
 			}
 			break;
+		case ETileShape::BigFourWayIntersection:
+			// Handle FourWayIntersection logic
+			if (TileActor->bIsChurch) {
+				LevelIndex = RandomStream.RandRange(0, ChurchBigFourWayIntersectionLevels.Num() - 1);
+				LoadLevelAtPosition(World, ChurchBigFourWayIntersectionLevels[LevelIndex], Position, Rotation);
+			}
+			else {
+				LevelIndex = RandomStream.RandRange(0, BigFourWayIntersectionLevels.Num() - 1);
+				LoadLevelAtPosition(World, BigFourWayIntersectionLevels[LevelIndex], Position, Rotation);
+			}
+			break;
 		case ETileShape::EndCap:;
 			// Handle EndCap logic
 			if (TileActor->bIsChurch) {

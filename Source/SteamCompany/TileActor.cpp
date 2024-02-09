@@ -51,6 +51,7 @@ void ATileActor::OnTileShapeChanged()
 	LeftArrow->SetVisibility(true);
 	RightArrow->SetVisibility(true);
 	ChurchMesh->SetVisibility(false);
+	SetActorScale3D(FVector(1.0f, 1.0f, 1.0f));
 
 	if (bIsChurch) ChurchMesh->SetVisibility(true);
 
@@ -72,6 +73,10 @@ void ATileActor::OnTileShapeChanged()
 		break;
 	case ETileShape::FourWayIntersection:
 		// Handle FourWayIntersection logic
+		break;
+	case ETileShape::BigFourWayIntersection:
+		// Handle BigFourWayIntersection logic
+		SetActorScale3D(FVector(2.0f, 2.0f, 1.0f));
 		break;
 	case ETileShape::EndCap:
 		ForwardArrow->SetVisibility(false);

@@ -16,6 +16,7 @@ enum class ETileShape : uint8
     Corner,
     ThreeWayIntersection,
 	FourWayIntersection,
+	BigFourWayIntersection,
 	EndCap
 };
 
