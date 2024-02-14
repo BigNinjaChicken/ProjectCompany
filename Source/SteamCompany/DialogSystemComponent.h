@@ -63,6 +63,11 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerResetMovementSpeed();
 
+	UFUNCTION(BlueprintCallable)
+	void EndDialog();
+
+	bool bDialogComplete = false;
+
 	UFUNCTION()
 	void LerpCameraToJester();
 

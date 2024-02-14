@@ -4,6 +4,8 @@
 #include "CombatComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GenerateLevelActor.h"
+#include "../../../../../../../Source/Runtime/NavigationSystem/Public/NavigationSystem.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Components/CapsuleComponent.h"
 
 // Sets default values
 AEnemyManagerActor::AEnemyManagerActor()
@@ -42,6 +44,8 @@ void AEnemyManagerActor::SpawnEnemies()
     TArray<AActor*> Actors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemySpawnNodeActor::StaticClass(), Actors);
 
+    // Collect spawn nodes
+    TArray<AEnemySpawnNodeActor*> EnemySpawnNodeActors;
     for (AActor* Actor : Actors)
     {
         if (AEnemySpawnNodeActor* EnemySpawnNodeActor = Cast<AEnemySpawnNodeActor>(Actor))
@@ -55,78 +59,65 @@ void AEnemyManagerActor::SpawnEnemies()
         return;
     }
 
-    TArray<AActor*> CharacterActors;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), CharacterActors);
-
-    for (AActor* CharactorActor : CharacterActors)
+    ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+    if (!PlayerCharacter)
     {
-        ACharacter* Character = Cast<ACharacter>(CharactorActor);
-        UActorComponent* CharacterComponent = Character->GetComponentByClass(UCombatComponent::StaticClass());
-        UCombatComponent* CombatComponent = Cast<UCombatComponent>(CharacterComponent);
+        UE_LOG(LogTemp, Warning, TEXT("Player character not found"));
+        return;
+    }
 
-        if (!CombatComponent)
+    UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+    if (!NavSys)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Navigation system not found"));
+        return;
+    }
+
+    EnemySpawnNodeActors.Sort([&PlayerCharacter](const AEnemySpawnNodeActor& A, const AEnemySpawnNodeActor& B) {
+        return FVector::Dist(PlayerCharacter->GetActorLocation(), A.GetActorLocation()) < FVector::Dist(PlayerCharacter->GetActorLocation(), B.GetActorLocation());
+        });
+
+    for (int32 i = 0; i < EnemiesPerPlayer; ++i)
+    {
+        for (AEnemySpawnNodeActor* SpawnNode : EnemySpawnNodeActors)
         {
-            continue;
-        }
+            FNavLocation NavLocation;
+            const float SpawnRadius = 500.0f; // Adjust radius as needed
 
-        if (!CombatComponent->bIsPlayer)
-        {
-            continue;
-        }
-
-        // Sort the spawn nodes based on distance from the player
-        EnemySpawnNodeActors.Sort([CharactorActor](const AEnemySpawnNodeActor& A, const AEnemySpawnNodeActor& B) {
-            return FVector::Dist(CharactorActor->GetActorLocation(), A.GetActorLocation()) < FVector::Dist(CharactorActor->GetActorLocation(), B.GetActorLocation());
-            });
-
-        // Spawn enemies at the closest nodes
-        for (int32 i = 0; i < EnemiesPerPlayer; ++i)
-        {
-            int32 RandomIndex = FMath::RandRange(0, 4);
-            if (EnemySpawnNodeActors[RandomIndex])
+            // Adjusted part: Project spawn location to the nearest navigable ground surface
+            if (NavSys->GetRandomPointInNavigableRadius(SpawnNode->GetActorLocation(), SpawnRadius, NavLocation))
             {
-                FTransform SpawnTransform = EnemySpawnNodeActors[RandomIndex]->GetActorTransform();
-                ACharacter* SpawnedEnemyCharacter = nullptr;
-
-                // Variables for collision handling
-                bool bPositionFound = false;
-                const float StepHeight = 10.0f;  // Adjust this value based on your needs
-                const int MaxTries = 100;  // Prevents infinite loops
-                int CurrentTry = 0;
-
-                // Create a temporary instance for collision checks
-                ACharacter* TempEnemyCharacter = NewObject<ACharacter>(GetTransientPackage(), EnemyCharacter);
-
-                while (!bPositionFound && CurrentTry < MaxTries) {
-                    // Check if the actor can be spawned without colliding
-                    if (!GetWorld()->EncroachingBlockingGeometry(TempEnemyCharacter, SpawnTransform.GetLocation(), SpawnTransform.GetRotation().Rotator())) {
-                        // Spawn the actor if there's no collision
-                        SpawnedEnemyCharacter = GetWorld()->SpawnActor<ACharacter>(EnemyCharacter, SpawnTransform);
-                        bPositionFound = true;
-                    }
-                    else {
-                        // Move the spawn position upwards and try again
-                        FVector NewLocation = SpawnTransform.GetLocation() + FVector(0.0f, 0.0f, StepHeight);
-                        SpawnTransform.SetLocation(NewLocation);
-                        CurrentTry++;
+                FActorSpawnParameters SpawnParameters;
+                SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+                
+                // Get the capsule component height of the EnemyCharacter
+                float CapsuleHalfHeight = 0.0f;
+                if (EnemyCharacter)
+                {
+                    // Assuming the default capsule component is used for the character's collision
+                    const UCapsuleComponent* CapsuleComponent = EnemyCharacter->GetDefaultObject<ACharacter>()->GetCapsuleComponent();
+                    if (CapsuleComponent)
+                    {
+                        CapsuleHalfHeight = CapsuleComponent->GetScaledCapsuleHalfHeight();
                     }
                 }
 
-                if (!SpawnedEnemyCharacter) {
-                    UE_LOG(LogTemp, Warning, TEXT("Failed to spawn enemy character after %d tries."), MaxTries);
-                }
+                // Modify the NavLocation's Z value by adding the capsule's half height
+                FVector ModifiedLocation = NavLocation.Location;
+                ModifiedLocation.Z += CapsuleHalfHeight * 2; // Multiply by 2 to get the full height
 
-                // Ensure to clean up the temporary actor
-                if (TempEnemyCharacter) {
-                    TempEnemyCharacter->ConditionalBeginDestroy();
-                }
+                // Now spawn the enemy character at the modified location
+                ACharacter* SpawnedEnemy = GetWorld()->SpawnActor<ACharacter>(EnemyCharacter, FTransform(ModifiedLocation), SpawnParameters);
 
+                if (SpawnedEnemy)
+                {
+                    break; // Successfully spawned an enemy, break to attempt the next spawn
+                }
             }
         }
     }
 
     WaveCount++;
-    
     if (WaveCount % EnemySpawnRateWaveIncrement == 0)
     {
         EnemiesPerPlayer += EnemyIncreaseAmount;

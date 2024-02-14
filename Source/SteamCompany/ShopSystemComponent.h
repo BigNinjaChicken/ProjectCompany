@@ -89,7 +89,7 @@ public:
 	int32 CurrentLineIndex = 0;
 	int32 CurrentLevel = 0;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	float StartingMaxWalkSpeed = 100.0f;
 
 	UCameraComponent* CameraComponent;

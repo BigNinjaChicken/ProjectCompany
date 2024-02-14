@@ -54,6 +54,7 @@ void UDialogSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UDialogSystemComponent::BeginDialog()
 {
 	if (bInDialog) return;
+	if (bDialogComplete) return;
 
 	ULevelAdvancedFriendsGameInstance* GameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	CurrentLevel = GameInstance->CurrentLevel;
@@ -70,6 +71,12 @@ void UDialogSystemComponent::BeginDialog()
 	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
 	CharacterMovementComponent->MaxWalkSpeed = 0.0f;
 
+	if (PlayerController) {
+		FInputModeGameAndUI InputMode;
+		PlayerController->SetInputMode(InputMode);
+		PlayerController->bShowMouseCursor = true;
+	}
+
 	LerpCameraToJester();
 
 	bInDialog = true;
@@ -84,9 +91,34 @@ void UDialogSystemComponent::ServerResetMovementSpeed_Implementation()
 	CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
 }
 
+void UDialogSystemComponent::EndDialog()
+{
+	OnEndDialog.Broadcast();
+
+	ServerResetMovementSpeed();
+
+	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+	CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+
+	if (PlayerController) {
+		FInputModeGameOnly InputMode;
+		PlayerController->SetInputMode(InputMode);
+		PlayerController->bShowMouseCursor = false;
+	}
+
+	GetWorld()->GetTimerManager().ClearTimer(CameraLerpTimerHandle);
+
+	CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
+	CameraComponent->bUsePawnControlRotation = true;
+
+	bDialogComplete = true;
+	Deactivate();
+}
+
 void UDialogSystemComponent::Interact()
 {
 	if (!bInDialog) return;
+	if (bDialogComplete) return;
 
 	if (!LevelDialog.Contains(CurrentLevel))
 	{
@@ -95,17 +127,7 @@ void UDialogSystemComponent::Interact()
 	}
 
 	if (CurrentLineIndex == LevelDialog[CurrentLevel].Lines.Num()) {
-		OnEndDialog.Broadcast();
-
-		ServerResetMovementSpeed();
-
-		UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-		CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
-
-		GetWorld()->GetTimerManager().ClearTimer(CameraLerpTimerHandle);
-
-		CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
-		CameraComponent->bUsePawnControlRotation = true;
+		EndDialog();
 
 		return;
 	}

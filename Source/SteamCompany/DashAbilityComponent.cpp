@@ -63,6 +63,7 @@ void UDashAbilityComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty
 
     DOREPLIFETIME(UDashAbilityComponent, OnComplete);
     DOREPLIFETIME(UDashAbilityComponent, OnCooldownBegin);
+    DOREPLIFETIME(UDashAbilityComponent, bOnCooldown);
 }
 
 void UDashAbilityComponent::Dash()
@@ -77,7 +78,6 @@ void UDashAbilityComponent::Dash()
     }
 
     OnCooldownBegin.Broadcast(BiteCooldown);
-    bOnCooldown = true;
     FTimerHandle CooldownTimerHandle;
     GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &UDashAbilityComponent::CooldownComplete, BiteCooldown, false);
 
@@ -91,28 +91,80 @@ void UDashAbilityComponent::CooldownComplete()
 
 void UDashAbilityComponent::Dash_Server_Implementation()
 {
+    if (bOnCooldown) 
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Dash_Server_Implementation: Early exit due to ability on cooldown."));
+        return;
+    }
+
+    bOnCooldown = true;
+    Character = Cast<ACharacter>(GetOwner());
     if (!Character)
     {
+        UE_LOG(LogTemp, Warning, TEXT("Dash_Server_Implementation: Early exit due to Character being null"));
+        return;
+    }
+
+    FVector StartPosition = Character->GetActorLocation();
+    FVector DashDirection;
+    APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+    if (!PlayerController)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Dash_Server_Implementation: Failed to cast character controller to APlayerController."));
         return;
     }
 
     UPawnMovementComponent* MovementComponent = Character->GetMovementComponent();
-    APawn* PlayerPawn = Cast<APawn>(Character);
-
-    if (!PlayerPawn || !MovementComponent)
+    if (!MovementComponent)
     {
+        UE_LOG(LogTemp, Warning, TEXT("Dash_Server_Implementation: MovementComponent is null."));
         return;
     }
+    FVector CurrentVelocity = MovementComponent->Velocity;
+    CurrentVelocity.Z = 0; // Ensure dash is only horizontal
+    DashDirection = CurrentVelocity.IsNearlyZero() ? FVector(1, 0, 0) : CurrentVelocity.GetSafeNormal(); // Default direction if no velocity
 
-    FRotator ControlRotation = PlayerPawn->GetControlRotation();
-    FVector Velocity = Character->GetVelocity();
-    bool bHasVelocity = Velocity.Normalize();  // Normalize the velocity vector in place and check if it's not a zero vector.
+    FVector EndPosition = StartPosition + DashDirection * DashDistance;
+    FHitResult HitResult;
 
-    if (bHasVelocity)
+    // Perform the raycast to check for obstacles
+    bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartPosition, EndPosition, ECC_Visibility);
+    UE_LOG(LogTemp, Log, TEXT("Dash_Server_Implementation: Raycast %s, Distance: %f"), bHit ? TEXT("hit") : TEXT("missed"), bHit ? HitResult.Distance : 0.0f);
+    if (bHit && HitResult.Distance > 0)
     {
-        Character->LaunchCharacter(Velocity * DashStrength, false, false);
+        EndPosition = StartPosition + DashDirection * HitResult.Distance;
+    }
+
+    // Calculate the time it should take to complete the dash
+    float DashTime = DashDistance / DashSpeed;
+    if (bHit)
+    {
+        DashTime = HitResult.Distance / DashSpeed;
     }
 
     CombatComp->SetInvincible(InvincibilityTime);
+    bOnCooldown = true;
+    FTimerHandle CooldownTimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &UDashAbilityComponent::CooldownComplete, BiteCooldown, false); // Assume CooldownDuration is a corrected variable name
 
+    // Adjust the dash implementation to track elapsed time
+    float ElapsedTime = 0.0f; // Initialize elapsed time
+    GetWorld()->GetTimerManager().SetTimer(DashTimerHandle, [this, StartPosition, EndPosition, DashTime, ElapsedTime]() mutable {
+        if (ElapsedTime < DashTime)
+        {
+            // Calculate the current position using the elapsed time
+            float Alpha = ElapsedTime / DashTime;
+            FVector NewPosition = FMath::Lerp(StartPosition, EndPosition, Alpha);
+            Character->SetActorLocation(NewPosition);
+
+            ElapsedTime += 0.01; // Increment elapsed time by the tick interval
+        }
+        else
+        {
+            // Stop the timer once the dash duration has elapsed
+            GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
+        }
+        }, 0.01, true);
+
+    UE_LOG(LogTemp, Log, TEXT("Dash_Server_Implementation: Dash initiated from %s to %s over %f seconds."), *StartPosition.ToString(), *EndPosition.ToString(), DashTime);
 }

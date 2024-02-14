@@ -17,7 +17,7 @@ class STEAMCOMPANY_API UDashAbilityComponent : public UActorComponent
 {
     GENERATED_BODY()
 
-public:    
+public:
     // Sets default values for this component's properties
     UDashAbilityComponent();
 
@@ -27,53 +27,64 @@ protected:
 
     // Reference to the CombatComponent
     UPROPERTY()
-    UCombatComponent* CombatComp;
-    
+        UCombatComponent* CombatComp;
+
     // Reference to Owner
     UPROPERTY()
-    ACharacter* Character;
+        ACharacter* Character;
 
     /** MappingContext */
     UPROPERTY(EditAnywhere, Category = "Input")
-	UInputMappingContext* DashMappingContext;
+        UInputMappingContext* DashMappingContext;
 
-	/** Fire Input Action */
+    /** Fire Input Action */
     UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* DashAction;
+        UInputAction* DashAction;
 
-public:    
+public:
     // Called every frame
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     // Replication setup
     virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
-	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void Dash();
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+        void Dash();
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-    float BiteCooldown = 2.0f;
+        float BiteCooldown = 2.0f;
 
     // Delegate for damage events
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
-    FOnDashComplete OnComplete;
+        FOnDashComplete OnComplete;
 
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
-    FOnDashCooldownBegin OnCooldownBegin;
+        FOnDashCooldownBegin OnCooldownBegin;
 
     void CooldownComplete();
 
+    UPROPERTY(Replicated)
     bool bOnCooldown = false;
 
     UFUNCTION(Server, Reliable)
-    void Dash_Server();
+        void Dash_Server();
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-    float DashStrength = 100.0f;
+        float DashStrength = 100.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-    float InvincibilityTime = 1.0f;
+        float InvincibilityTime = 1.0f;
 
     UFUNCTION()
-    void OnRep_BiteDamageComplete() {}
+        void OnRep_BiteDamageComplete() {}
+
+    // Add these properties to your UDashAbilityComponent class declaration
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+        float DashDistance = 1000.0f; // Distance of the dash
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+        float DashSpeed = 6000.0f; // Speed of the dash
+
+    UPROPERTY()
+    FTimerHandle DashTimerHandle;
 };

@@ -51,8 +51,8 @@ void UShopSystemComponent::EndShop() {
 	ServerResetMovementSpeed();
 
 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	if (CharacterMovementComponent && StartingMaxWalkSpeed != 0) CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
-	
+	CharacterMovementComponent->MaxWalkSpeed = 600.0f;
+
 	FInputModeGameOnly InputModeGameOnly;
 	if (PlayerController) {
 		PlayerController->SetInputMode(InputModeGameOnly);
@@ -62,6 +62,8 @@ void UShopSystemComponent::EndShop() {
 	GetWorld()->GetTimerManager().ClearTimer(CameraLerpTimerHandle);
 
 	if (CameraComponent) CameraComponent->bUsePawnControlRotation = true;
+
+	Deactivate();
 }
 
 
@@ -70,7 +72,6 @@ void UShopSystemComponent::ServerResetMovementSpeed_Implementation()
 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
 	if (CharacterMovementComponent && StartingMaxWalkSpeed != 0) {
 
-		UE_LOG(LogTemp, Warning, TEXT("Here1"));
 		CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
 	}
 
@@ -84,8 +85,8 @@ void UShopSystemComponent::ServerResetMovementSpeed_Implementation()
 void UShopSystemComponent::GetStartingSpeed_Implementation()
 {
 
-	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
+// 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+// 	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
 }
 
 void UShopSystemComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
@@ -111,6 +112,7 @@ void UShopSystemComponent::Interact()
 		PlayerController->SetInputMode(InputModeUIOnly);
 		PlayerController->bShowMouseCursor = true;
 	}
+
 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
 	CharacterMovementComponent->MaxWalkSpeed = 0.0f;
 	

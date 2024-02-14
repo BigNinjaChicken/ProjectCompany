@@ -41,8 +41,8 @@ public:
     UPROPERTY()
     int32 WaveCount;
 
-    UPROPERTY()
-    TArray<AEnemySpawnNodeActor*> EnemySpawnNodeActors;
+//     UPROPERTY()
+//     TArray<AEnemySpawnNodeActor*> EnemySpawnNodeActors;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
     TSubclassOf<ACharacter> EnemyCharacter;
