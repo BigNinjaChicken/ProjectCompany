@@ -29,20 +29,8 @@ void UPauseComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//OnResumeButtonClicked.Broadcast();
-	//Cast<UButton>(Cast<UUserWidget>(PauseWidget)->GetWidgetFromName("ResumeButton"))->OnClicked.Add(UPauseComponent::ResumeGame);
-
-	// Attempt to find the CombatComponent on the same actor
-	CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>();
-	if (!CombatComp)
-	{
-		// Handle the case where no CombatComponent is found
-		UE_LOG(LogTemp, Warning, TEXT("Requires a CombatComponent on the same actor!"));
-		return;
-	}
-
 	// Attempt to find Owner Character
-	Character = Cast<ACharacter>(GetOwner());
+	Character = Cast<APawn>(GetOwner());
 	if (!Character)
 	{
 		// Handle the case where no CombatComponent is found
@@ -80,5 +68,6 @@ void UPauseComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 void UPauseComponent::PauseGame()
 {
 	OnResumeButtonClicked.Broadcast();
+	UE_LOG(LogTemp, Warning, TEXT("Here1"));
 }
 

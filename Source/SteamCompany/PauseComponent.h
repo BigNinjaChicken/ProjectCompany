@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Pawn.h"
 #include "PauseComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResumeButtonClicked);
@@ -34,7 +35,7 @@ protected:
     
 	// Reference to Owner
 	UPROPERTY()
-	ACharacter* Character;
+	APawn* Character;
 	
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, Category = "Input")

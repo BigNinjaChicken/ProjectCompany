@@ -122,7 +122,7 @@ void UDashAbilityComponent::Dash_Server_Implementation()
     }
     FVector CurrentVelocity = MovementComponent->Velocity;
     CurrentVelocity.Z = 0; // Ensure dash is only horizontal
-    DashDirection = CurrentVelocity.IsNearlyZero() ? FVector(1, 0, 0) : CurrentVelocity.GetSafeNormal(); // Default direction if no velocity
+    DashDirection = CurrentVelocity.IsNearlyZero() ? Character->GetActorForwardVector().GetSafeNormal() : CurrentVelocity.GetSafeNormal(); // Default direction if no velocity
 
     FVector EndPosition = StartPosition + DashDirection * DashDistance;
     FHitResult HitResult;
