@@ -6,8 +6,8 @@
 #include "GameFramework/Character.h"
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
-#include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/PlayerController.h"
+#include "EnhancedInputSubsystems.h"
+#include "GameFramework/PlayerController.h"
 #include "PlayerInteractableObjComponent.h"
 
 UPlayerInteractComponent::UPlayerInteractComponent()

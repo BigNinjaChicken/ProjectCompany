@@ -5,6 +5,10 @@
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "ItemPickupActor.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Engine/EngineTypes.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Actor.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
+#include "ObjectiveSystemComponent.h"
 
 ABossCharacter::ABossCharacter()
 {
@@ -26,6 +30,7 @@ void ABossCharacter::BeginPlay()
 
 void ABossCharacter::HandleActorDead()
 {
+    // Drop Item
     if (DropedItemPossibilites.Num() == 0)
     {
         UE_LOG(LogTemp, Warning, TEXT("Owner is not ACharacter"));
@@ -44,6 +49,21 @@ void ABossCharacter::HandleActorDead()
         SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         AItemPickupActor* SpawnedActor = GetWorld()->SpawnActor<AItemPickupActor>(ItemActorToSpawn, GetActorLocation(), GetActorRotation(), SpawnParameters);
         bHasDroppedItem = true;
+    }
+
+    // Mark off objective
+    TArray<AActor*> OutActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), OutActors);
+    for (AActor* OutActor : OutActors) 
+    {
+        ACharacter* CharacterActor = Cast<ACharacter>(OutActor);
+        if (CharacterActor) {
+            UActorComponent* ActorComponent = CharacterActor->GetComponentByClass(UObjectiveSystemComponent::StaticClass());
+            if (ActorComponent) {
+                UObjectiveSystemComponent* ObjectiveSystemComponent = Cast<UObjectiveSystemComponent>(ActorComponent);
+                ObjectiveSystemComponent->CompleteObjective(EObjectiveType::KillBoss);
+            }
+        }
     }
 
     OnBossDead.Broadcast();

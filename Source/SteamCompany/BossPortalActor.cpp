@@ -14,6 +14,7 @@
 #include "CombatComponent.h"
 #include "Starter/SteamCompanyPlayerController.h"
 #include "../Classes/AdvancedSessionsLibrary.h"
+#include "ObjectiveSystemComponent.h"
 
 // Sets default values
 ABossPortalActor::ABossPortalActor()
@@ -51,43 +52,23 @@ void ABossPortalActor::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
 }
-// 
-// UE_LOG(LogTemp, Warning, TEXT("CombatComponent null"));
-// return;
+
 void ABossPortalActor::OnInteractHandler()
 {
-//     ULevelAdvancedFriendsGameInstance* AdvancedFriendsGameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-//     TArray<AActor*> CharacterActors;
-//     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), CharacterActors);
-// 
-//     for (AActor* CharacterActor : CharacterActors)
-//     {
-//         UCombatComponent* CombatComponent = Cast<UCombatComponent>(CharacterActor->GetComponentByClass(UCombatComponent::StaticClass()));
-//         if (CombatComponent && CombatComponent->bIsPlayer) 
-//         {
-//             FString PlayerName;
-//             APlayerController* PlayerController = Cast<APlayerController>(Cast<APawn>(CharacterActor)->GetController());
-//             FBPUniqueNetId UniqueID;
-//             UAdvancedSessionsLibrary::GetUniqueNetID(PlayerController, UniqueID);
-//             UAdvancedSessionsLibrary::UniqueNetIdToString(UniqueID, PlayerName);
-// 
-//             TArray<UActorComponent*> ItemEffectActorComponents;
-//             CharacterActor->GetComponents(UItemEffectComponent::StaticClass(), ItemEffectActorComponents);
-// 
-//             FItemEffectComponentArray ItemEffectComponentArray;
-//             for (UActorComponent* ItemEffectActorComponent : ItemEffectActorComponents) {
-//                 UItemEffectComponent* ItemEffectComponent = Cast<UItemEffectComponent>(ItemEffectActorComponent);
-//                 if (ItemEffectComponent) {
-//                     FItemData ItemData;
-//                     ItemData.ItemEffectComponent = ItemEffectComponent->GetClass();
-//                     ItemData.ItemCount = ItemEffectComponent->ItemCount;
-//                     ItemEffectComponentArray.PlayerItems.Add(ItemData);
-//                 }
-//             }
-// 
-//             AdvancedFriendsGameInstance->PlayerItemsMap.Add(PlayerName, ItemEffectComponentArray);
-//         }
-//     }
+    // Mark off objective
+    TArray<AActor*> OutActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), OutActors);
+    for (AActor* OutActor : OutActors)
+    {
+        ACharacter* CharacterActor = Cast<ACharacter>(OutActor);
+        if (CharacterActor) {
+            UActorComponent* ActorComponent = CharacterActor->GetComponentByClass(UObjectiveSystemComponent::StaticClass());
+            if (ActorComponent) {
+                UObjectiveSystemComponent* ObjectiveSystemComponent = Cast<UObjectiveSystemComponent>(ActorComponent);
+                ObjectiveSystemComponent->CompleteObjective(EObjectiveType::EnterPortal);
+            }
+        }
+    }
 
     FString InUrl = "/Game/Frazier/Creative/LV_Lair?listen";
     UAdvancedSessionsLibrary::ServerTravel(GetWorld(), InUrl, false, false);

@@ -10,6 +10,10 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/SphereComponent.h"
 #include "PlayerInteractableObjComponent.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Actor.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
+#include "ObjectiveSystemComponent.h"
 
 // Sets default values
 AStartChurchEventActor::AStartChurchEventActor()
@@ -54,6 +58,21 @@ void AStartChurchEventActor::Tick(float DeltaTime)
 void AStartChurchEventActor::OnInteractHandler()
 {
 	if (BossEventActor) {
+        // Mark off objective
+        TArray<AActor*> OutActors;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), OutActors);
+        for (AActor* OutActor : OutActors)
+        {
+            ACharacter* CharacterActor = Cast<ACharacter>(OutActor);
+            if (CharacterActor) {
+                UActorComponent* ActorComponent = CharacterActor->GetComponentByClass(UObjectiveSystemComponent::StaticClass());
+                if (ActorComponent) {
+                    UObjectiveSystemComponent* ObjectiveSystemComponent = Cast<UObjectiveSystemComponent>(ActorComponent);
+                    ObjectiveSystemComponent->CompleteObjective(EObjectiveType::DestroySacredStatues);
+                }
+            }
+        }
+
 		BossEventActor->BeginBossEvent();
 	}
 
