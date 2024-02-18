@@ -1,18 +1,18 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Simplified and optimized includes, removing duplicates and unnecessary paths.
 #include "ShopSystemComponent.h"
-#include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
-#include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/InputTriggers.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/PlayerController.h"
-#include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "EnhancedInputComponent.h"
+#include "InputTriggers.h"
+#include "GameFramework/PlayerController.h"
+#include "EnhancedInputSubsystems.h"
+#include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 #include "LevelAdvancedFriendsGameInstance.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "JesterActor.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Camera/CameraComponent.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
+#include "Camera/CameraComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "ShopActor.h"
+#include "Net/UnrealNetwork.h"
 
 UShopSystemComponent::UShopSystemComponent()
 {
@@ -24,20 +24,14 @@ void UShopSystemComponent::BeginPlay()
 	Super::BeginPlay();
 
 	Character = Cast<ACharacter>(GetOwner());
-	if (!Character)
+	PlayerController = Character ? Cast<APlayerController>(Character->GetController()) : nullptr;
+	if (!Character || !PlayerController)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Owner is not ACharacter"));
+		UE_LOG(LogTemp, Warning, TEXT("%s"), !Character ? TEXT("Owner is not ACharacter") : TEXT("PlayerController null"));
 		return;
 	}
 
-	PlayerController = Cast<APlayerController>(Character->GetController());
-	if (!PlayerController)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerController null"));
-		return;
-	}
-
-	GetStartingSpeed();
+	ServerGetStartingSpeed();
 }
 
 void UShopSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -45,110 +39,96 @@ void UShopSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UShopSystemComponent::EndShop() {
+void UShopSystemComponent::EndShop()
+{
 	OnEndDialog.Broadcast();
-
-	ServerResetMovementSpeed();
-
-	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	CharacterMovementComponent->MaxWalkSpeed = 600.0f;
-
-	FInputModeGameOnly InputModeGameOnly;
-	if (PlayerController) {
-		PlayerController->SetInputMode(InputModeGameOnly);
-		PlayerController->bShowMouseCursor = false;
-	}
-
+	MulticastResetMovementSpeed();
+	ResetInputMode();
 	GetWorld()->GetTimerManager().ClearTimer(CameraLerpTimerHandle);
+	if (!CameraComponent) // Check added for safety, although it should be initialized in BeginPlay
+		CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
 
-	if (CameraComponent) CameraComponent->bUsePawnControlRotation = true;
-
+	CameraComponent->bUsePawnControlRotation = true;
 	Deactivate();
 }
 
-
-void UShopSystemComponent::ServerResetMovementSpeed_Implementation()
+void UShopSystemComponent::MulticastResetMovementSpeed_Implementation()
 {
-	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	if (CharacterMovementComponent && StartingMaxWalkSpeed != 0) {
-
-		CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+	if (Character)
+	{
+		UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+		if (CharacterMovementComponent)
+		{
+			CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+		}
 	}
+	ResetInputMode();
+}
 
-	FInputModeGameOnly InputModeGameOnly;
-	if (PlayerController) {
-		PlayerController->SetInputMode(InputModeGameOnly);
-		PlayerController->bShowMouseCursor = false;
+void UShopSystemComponent::ServerGetStartingSpeed_Implementation()
+{
+	if (Character)
+	{
+		UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+		StartingMaxWalkSpeed = CharacterMovementComponent ? CharacterMovementComponent->MaxWalkSpeed : 0;
 	}
 }
 
-void UShopSystemComponent::GetStartingSpeed_Implementation()
-{
-
-// 	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-// 	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
-}
-
-void UShopSystemComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+void UShopSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(UShopSystemComponent, StartingMaxWalkSpeed);
 }
 
 void UShopSystemComponent::Interact()
 {
-	if (bInShop) { return; }
+	if (bInShop) return;
 	bInShop = true;
 
-	if (ItemOptions.Num() == 0) {
+	if (ItemOptions.IsEmpty())
+	{
 		UE_LOG(LogTemp, Warning, TEXT("No ItemOptions"));
 		return;
 	}
 
-	PlayerController = Cast<APlayerController>(Character->GetController());
-	FInputModeUIOnly InputModeUIOnly;
-	if (PlayerController) {
-		PlayerController->SetInputMode(InputModeUIOnly);
-		PlayerController->bShowMouseCursor = true;
-	}
-
-	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	CharacterMovementComponent->MaxWalkSpeed = 0.0f;
-	
-	SetInteractSettings();
-
+	MulticastSetInteractSettings();
 	LerpCameraToJester();
 
-	TArray<TSubclassOf<UItemEffectComponent>> ItemsToPickFrom;
-	ItemsToPickFrom.AddUnique(ItemOptions[FMath::RandRange(0, ItemOptions.Num() - 1)]);
-	ItemsToPickFrom.AddUnique(ItemOptions[FMath::RandRange(0, ItemOptions.Num() - 1)]);
-	ItemsToPickFrom.AddUnique(ItemOptions[FMath::RandRange(0, ItemOptions.Num() - 1)]);
-
-	OnShopChange.Broadcast(ItemsToPickFrom);
+	PresentItemOptions();
 }
 
-void UShopSystemComponent::SetInteractSettings_Implementation()
+void UShopSystemComponent::MulticastSetInteractSettings_Implementation()
 {
-	PlayerController = Cast<APlayerController>(Character->GetController());
-	FInputModeUIOnly InputModeUIOnly;
-	if (PlayerController) {
-		PlayerController->SetInputMode(InputModeUIOnly);
+	if (PlayerController)
+	{
+		FInputModeUIOnly InputMode;
+		PlayerController->SetInputMode(InputMode);
 		PlayerController->bShowMouseCursor = true;
 	}
 
-	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
-	CharacterMovementComponent->MaxWalkSpeed = 0.0f;
+	if (Character)
+	{
+		UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+		if (CharacterMovementComponent)
+		{
+			StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
+			CharacterMovementComponent->MaxWalkSpeed = 0.0f;
+		}
+	}
 }
 
-void UShopSystemComponent::LerpCameraToJester()
+void UShopSystemComponent::LerpCameraToJester() 
 {
 	ShopKeeperActor = UGameplayStatics::GetActorOfClass(GetWorld(), AShopActor::StaticClass());
 	if (!ShopKeeperActor)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("JesterActor is not set"));
+		UE_LOG(LogTemp, Warning, TEXT("ShopKeeperActor is not set"));
 		return;
+	}
+
+	if (!CameraComponent)
+	{
+		CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
+		CameraComponent->bUsePawnControlRotation = false;
 	}
 
 	GetWorld()->GetTimerManager().SetTimer(CameraLerpTimerHandle, this, &UShopSystemComponent::UpdateCameraLerp, 0.01f, true);
@@ -158,8 +138,6 @@ void UShopSystemComponent::UpdateCameraLerp()
 {
 	float DeltaTime = GetWorld()->GetDeltaSeconds();
 
-	CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
-	CameraComponent->bUsePawnControlRotation = false;
 	if (!CameraComponent)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CameraComponent is not set"));
@@ -167,7 +145,25 @@ void UShopSystemComponent::UpdateCameraLerp()
 	}
 
 	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(CameraComponent->GetComponentLocation(), ShopKeeperActor->GetActorLocation());
-	FRotator NewRotation = FMath::RInterpTo(CameraComponent->GetComponentRotation(), TargetRotation, DeltaTime, 8.0f);
-	CameraComponent->SetWorldRotation(NewRotation);
+	CameraComponent->SetWorldRotation(FMath::RInterpTo(CameraComponent->GetComponentRotation(), TargetRotation, DeltaTime, 1.0f));
 }
 
+void UShopSystemComponent::ResetInputMode()
+{
+	if (PlayerController)
+	{
+		FInputModeGameOnly InputMode;
+		PlayerController->SetInputMode(InputMode);
+		PlayerController->bShowMouseCursor = false;
+	}
+}
+
+void UShopSystemComponent::PresentItemOptions()
+{
+	TArray<TSubclassOf<UItemEffectComponent>> ItemsToPickFrom;
+	for (int i = 0; i < 3; ++i) // Simplified random selection.
+	{
+		ItemsToPickFrom.AddUnique(ItemOptions[FMath::RandRange(0, ItemOptions.Num() - 1)]);
+	}
+	OnShopChange.Broadcast(ItemsToPickFrom);
+}

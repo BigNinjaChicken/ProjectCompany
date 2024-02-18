@@ -1,15 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Camera/CameraComponent.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/PlayerController.h"
+#include "Camera/CameraComponent.h"
+#include "ItemEffectComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "ShopSystemComponent.generated.h"
-
-class UInputMappingContext;
-class UInputAction;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShopChange, const TArray<TSubclassOf<UItemEffectComponent>>&, ItemOptions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShopEndDialog);
@@ -17,84 +15,84 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShopEndDialog);
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STEAMCOMPANY_API UShopSystemComponent : public UActorComponent
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
-	UShopSystemComponent();
+public:
+    // Sets default values for this component's properties
+    UShopSystemComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+    // Called when the game starts
+    virtual void BeginPlay() override;
 
-	// Reference to Owner
+public:
+    // Called every frame
+    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+    // Functions for shop interaction
+    UFUNCTION(BlueprintCallable)
+        void EndShop();
+
+    UFUNCTION(BlueprintCallable)
+        void Interact();
+
+    // Server functions
+    UFUNCTION(NetMulticast, Reliable)
+        void MulticastSetInteractSettings();
+
+    UFUNCTION(Server, Reliable)
+        void ServerGetStartingSpeed();
+
+    UFUNCTION(NetMulticast, Reliable)
+        void MulticastResetMovementSpeed();
+
+    UFUNCTION()
+        void LerpCameraToJester();
+
+    UFUNCTION()
+        void UpdateCameraLerp();
+
+    // Helper function to reset input mode and cursor visibility
+    UFUNCTION()
+        void ResetInputMode();
+
+    // Helper function to present item options in the shop
+    UFUNCTION()
+        void PresentItemOptions();
+
+    // Delegate events
+    UPROPERTY(BlueprintAssignable, Category = "Shop")
+        FOnShopChange OnShopChange;
+
+    UPROPERTY(BlueprintAssignable, Category = "Shop")
+        FOnShopEndDialog OnEndDialog;
+
+    // Timer handle for camera lerp
     UPROPERTY()
-    ACharacter* Character;
+        FTimerHandle CameraLerpTimerHandle;
 
-	UPROPERTY()
-	APlayerController* PlayerController;
+    // Replicated property
+    UPROPERTY(Replicated, VisibleAnywhere, Category = "Debug")
+        float StartingMaxWalkSpeed;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+    // Item options for the shop
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
+        TArray<TSubclassOf<UItemEffectComponent>> ItemOptions;
 
-	UFUNCTION(BlueprintCallable)
-	void EndShop();
+    // Shop state flag
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+        bool bInShop = false;
 
-	// Delegate for changing dialog text
-    UPROPERTY(BlueprintAssignable, Category="Dialog")
-	FOnShopChange OnShopChange;
+    // References
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+        ACharacter* Character;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+        APlayerController* PlayerController;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+        UCameraComponent* CameraComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+        AActor* ShopKeeperActor;
 
-    // Delegate for ending dialog
-    UPROPERTY(BlueprintAssignable, Category="Dialog")
-	FOnShopEndDialog OnEndDialog;
-
-	UFUNCTION()
-	void LerpCameraToJester();
-
-	UFUNCTION()
-	void UpdateCameraLerp();
-
-	FTimerHandle CameraLerpTimerHandle;
-	float LerpAlpha = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
-	TArray<TSubclassOf<UItemEffectComponent>> ItemOptions;
-
-	/** MappingContext */
-    UPROPERTY(EditAnywhere, Category = "Input")
-	UInputMappingContext* InteractMappingContext;
-
-	/** Fire Input Action */
-    UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* InteractAction;
-
-	UFUNCTION()
-	void Interact();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void SetInteractSettings();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void ServerResetMovementSpeed();
-
-	UFUNCTION(Server, Reliable)
-	void GetStartingSpeed();
-
-	// Replication setup
-	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
-
-	bool bInShop = false;
-
-	int32 CurrentLineIndex = 0;
-	int32 CurrentLevel = 0;
-
-	UPROPERTY(Replicated, BlueprintReadWrite)
-	float StartingMaxWalkSpeed = 100.0f;
-
-	UCameraComponent* CameraComponent;
-
-	AActor* ShopKeeperActor;
-
-		
+    // Replication setup
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "DialogSystemComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
@@ -9,111 +6,116 @@
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "LevelAdvancedFriendsGameInstance.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/CharacterMovementComponent.h" // Consolidated include
 #include "JesterActor.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h"
 
 UDialogSystemComponent::UDialogSystemComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+    PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UDialogSystemComponent::BeginPlay()
 {
-	Super::BeginPlay();
-	
-	Character = Cast<ACharacter>(GetOwner());
-	if (!Character)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Owner is not ACharacter"));
-		return;
-	}
+    Super::BeginPlay();
 
-	PlayerController = Cast<APlayerController>(Character->GetController());
-	if (PlayerController)
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(InteractMappingContext, 1);
-		}
+    Character = Cast<ACharacter>(GetOwner());
+    if (!Character)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Owner is not ACharacter"));
+        return;
+    }
 
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
-		{
-			EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &UDialogSystemComponent::Interact);
-		}
-	}
+    // Initializing CameraComponent here if it's going to be used frequently
+    CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
+
+    PlayerController = Cast<APlayerController>(Character->GetController());
+    if (PlayerController)
+    {
+        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+        {
+            Subsystem->AddMappingContext(InteractMappingContext, 1);
+        }
+
+        if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+        {
+            EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &UDialogSystemComponent::Interact);
+        }
+    }
 }
 
 void UDialogSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 void UDialogSystemComponent::BeginDialog()
 {
-	if (bInDialog) return;
-	if (bDialogComplete) return;
+    if (bInDialog || bDialogComplete) return;
 
-	ULevelAdvancedFriendsGameInstance* GameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-	CurrentLevel = GameInstance->CurrentLevel;
+    ULevelAdvancedFriendsGameInstance* GameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+    CurrentLevel = GameInstance->CurrentLevel;
 
-	if (!LevelDialog.Contains(CurrentLevel))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No dialog for level"));
-		return;
-	}
+    if (!LevelDialog.Contains(CurrentLevel))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No dialog for level"));
+        return;
+    }
 
-	UE_LOG(LogTemp, Warning, TEXT("Started Dialog"));
+    UE_LOG(LogTemp, Warning, TEXT("Started Dialog"));
 
-	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
-	CharacterMovementComponent->MaxWalkSpeed = 0.0f;
+    UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+    StartingMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
+    ResetMovementSpeed(0.0f);
 
-	if (PlayerController) {
-		FInputModeGameAndUI InputMode;
-		PlayerController->SetInputMode(InputMode);
-		PlayerController->bShowMouseCursor = true;
-	}
+    if (PlayerController) {
+        FInputModeGameAndUI InputMode;
+        PlayerController->SetInputMode(InputMode);
+        PlayerController->bShowMouseCursor = true;
+    }
 
-	LerpCameraToJester();
+    LerpCameraToJester();
 
-	bInDialog = true;
+    bInDialog = true;
 
-	Interact();
-
+    Interact();
 }
 
 void UDialogSystemComponent::ServerResetMovementSpeed_Implementation()
 {
-	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+    ResetMovementSpeed(StartingMaxWalkSpeed); 
 }
 
 void UDialogSystemComponent::EndDialog()
 {
-	OnEndDialog.Broadcast();
+    OnEndDialog.Broadcast();
 
-	ServerResetMovementSpeed();
+    ResetMovementSpeed(StartingMaxWalkSpeed);
 
-	UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
-	CharacterMovementComponent->MaxWalkSpeed = StartingMaxWalkSpeed;
+    if (PlayerController) {
+        FInputModeGameOnly InputMode;
+        PlayerController->SetInputMode(InputMode);
+        PlayerController->bShowMouseCursor = false;
+    }
 
-	if (PlayerController) {
-		FInputModeGameOnly InputMode;
-		PlayerController->SetInputMode(InputMode);
-		PlayerController->bShowMouseCursor = false;
-	}
+    GetWorld()->GetTimerManager().ClearTimer(CameraLerpTimerHandle);
 
-	GetWorld()->GetTimerManager().ClearTimer(CameraLerpTimerHandle);
+    if (!CameraComponent) // Check added for safety, although it should be initialized in BeginPlay
+        CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
 
-	CameraComponent = Cast<UCameraComponent>(Character->GetComponentByClass(UCameraComponent::StaticClass()));
-	CameraComponent->bUsePawnControlRotation = true;
+    CameraComponent->bUsePawnControlRotation = true;
 
-	bDialogComplete = true;
-	Deactivate();
+    bDialogComplete = true;
+    Deactivate();
 }
+
+void UDialogSystemComponent::ResetMovementSpeed(float Speed)
+{
+    UCharacterMovementComponent* CharacterMovementComponent = Character->GetCharacterMovement();
+    CharacterMovementComponent->MaxWalkSpeed = Speed;
+}
+
 
 void UDialogSystemComponent::Interact()
 {

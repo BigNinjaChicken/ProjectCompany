@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Camera/CameraComponent.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
+#include "GameFramework/Character.h"
 #include "DialogSystemComponent.generated.h"
 
 class UInputMappingContext;
@@ -19,6 +19,7 @@ struct FDialog
 {
     GENERATED_BODY()
 
+	// All lines used in the dialog for a given level
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
     TArray<FString> Lines;
 };
@@ -29,7 +30,7 @@ class STEAMCOMPANY_API UDialogSystemComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UDialogSystemComponent();
 
@@ -37,69 +38,139 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-
-public:
-	// Reference to Owner
-    UPROPERTY()
-    ACharacter* Character;
-
+	// Owning player character
 	UPROPERTY()
-	APlayerController* PlayerController;
+		ACharacter* Character;
 
+	// Owning player controller
+	UPROPERTY()
+		APlayerController* PlayerController;
+public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	// Delegate for changing dialog text
-    UPROPERTY(BlueprintAssignable, Category="Dialog")
-    FOnChangeDialogText OnChangeDialogText;
 
-    // Delegate for ending dialog
-    UPROPERTY(BlueprintAssignable, Category="Dialog")
-    FOnEndDialog OnEndDialog;
-
+	//************************************
+	// Method:    BeginDialog
+	// FullName:  UDialogSystemComponent::BeginDialog
+	// Access:    public 
+	// Returns:   void
+	// Qualifier: 
+	// 
+	// Responsible for starting the Dialog process.
+	//************************************
 	UFUNCTION(BlueprintCallable)
-	void BeginDialog();
+		void BeginDialog();
 
+
+	//************************************
+	// Method:    ServerResetMovementSpeed
+	// FullName:  UDialogSystemComponent::ServerResetMovementSpeed
+	// Access:    public 
+	// Returns:   void
+	// Qualifier:
+	// 
+	// Resets the movement speed of player
+	//************************************
+	UFUNCTION()
+		void ResetMovementSpeed(float Speed);
 	UFUNCTION(Server, Reliable)
-	void ServerResetMovementSpeed();
+		void ServerResetMovementSpeed();
 
+
+	//************************************
+	// Method:    EndDialog
+	// FullName:  UDialogSystemComponent::EndDialog
+	// Access:    public 
+	// Returns:   void
+	// Qualifier:
+	// 
+	// Responsible for ending the Dialog process.
+	//************************************
 	UFUNCTION(BlueprintCallable)
-	void EndDialog();
+		void EndDialog();
 
-	bool bDialogComplete = false;
 
+	//************************************
+	// Method:    LerpCameraToJester
+	// FullName:  UDialogSystemComponent::LerpCameraToJester
+	// Access:    public 
+	// Returns:   void
+	// Qualifier:
+	// 
+	// Gets jester and starts time handle for UpdateCameraLerp
+	//************************************
 	UFUNCTION()
-	void LerpCameraToJester();
+		void LerpCameraToJester();
 
+
+	//************************************
+	// Method:    UpdateCameraLerp
+	// FullName:  UDialogSystemComponent::UpdateCameraLerp
+	// Access:    public 
+	// Returns:   void
+	// Qualifier:
+	// 
+	// Moves camera to look at jester
+	//************************************
 	UFUNCTION()
-	void UpdateCameraLerp();
+		void UpdateCameraLerp();
 
-	FTimerHandle CameraLerpTimerHandle;
-	float LerpAlpha = 0.0f;
 
-	// Dialog for levels number
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
-	TMap<int32, FDialog> LevelDialog;
+	//************************************
+	// Method:    Interact
+	// FullName:  UDialogSystemComponent::Interact
+	// Access:    public 
+	// Returns:   void
+	// Qualifier:
+	// 
+	// Run on player input while binDialog
+	//************************************
+	UFUNCTION()
+		void Interact();
+
+	UPROPERTY(BlueprintAssignable, Category = "Delegate")
+		FOnChangeDialogText OnChangeDialogText;
+
+	UPROPERTY(BlueprintAssignable, Category = "Delegate")
+		FOnEndDialog OnEndDialog;
 
 	/** MappingContext */
-    UPROPERTY(EditAnywhere, Category = "Input")
-	UInputMappingContext* InteractMappingContext;
+	UPROPERTY(EditAnywhere, Category = "Input")
+		UInputMappingContext* InteractMappingContext;
 
 	/** Fire Input Action */
-    UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* InteractAction;
+	UPROPERTY(EditAnywhere, Category = "Input")
+		UInputAction* InteractAction;
 
-	UFUNCTION()
-	void Interact();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+		bool bDialogComplete = false;
 
-	bool bInDialog = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+		bool bInDialog = false;
 
-	int32 CurrentLineIndex = 0;
-	int32 CurrentLevel = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+		UCameraComponent* CameraComponent;
 
-	float StartingMaxWalkSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+		AActor* JesterActor;
 
-	UCameraComponent* CameraComponent;
+	UPROPERTY()
+		FTimerHandle CameraLerpTimerHandle;
 
-	AActor* JesterActor;
+	UPROPERTY(BlueprintReadOnly, Category = "Debug")
+		float LerpAlpha = 0.0f;
+
+	// Dialog for levels number
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialog")
+		TMap<int32, FDialog> LevelDialog;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+		int32 CurrentLineIndex = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+		int32 CurrentLevel = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
+		float StartingMaxWalkSpeed;
 };
