@@ -4,20 +4,25 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Components/BoxComponent.h"
-#include "Components/WidgetComponent.h"
-#include "Components/SphereComponent.h"
-#include "../../../../../../../Source/Runtime/Engine/Classes/Components/PrimitiveComponent.h"
-#include "ShopActor.generated.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Components/SphereComponent.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Components/BoxComponent.h"
+#include "../../../../../../../Source/Runtime/UMG/Public/Components/WidgetComponent.h"
+#include "ActiveItemEffectComponent.h"
+#include "ActiveItemPickupActor.generated.h"
+
+class UBoxComponent;
+class USphereComponent;
+class UWidgetComponent;
+class UActiveItemEffectComponent;
 
 UCLASS()
-class STEAMCOMPANY_API AShopActor : public AActor
+class STEAMCOMPANY_API AActiveItemPickupActor : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AShopActor();
+	AActiveItemPickupActor();
 
 protected:
 	// Called when the game starts or when spawned
@@ -32,7 +37,7 @@ public:
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+	
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
@@ -44,4 +49,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UWidgetComponent* InteractableWidgetComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item")
+	TSubclassOf<UActiveItemEffectComponent> ItemEffectType;
 };

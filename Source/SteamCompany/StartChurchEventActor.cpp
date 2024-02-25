@@ -55,7 +55,7 @@ void AStartChurchEventActor::Tick(float DeltaTime)
 
 }
 
-void AStartChurchEventActor::OnInteractHandler()
+void AStartChurchEventActor::OnInteractHandler(ACharacter* InteractingPlayer)
 {
 	if (BossEventActor) {
         // Mark off objective

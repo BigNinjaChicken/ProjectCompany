@@ -100,6 +100,6 @@ void UPlayerInteractComponent::ServerInteract_Implementation(UPlayerInteractable
 {
 	if (PlayerInteractableObjComponent)
 	{
-		PlayerInteractableObjComponent->OnInteract.Broadcast();
+		PlayerInteractableObjComponent->OnInteract.Broadcast(Character);
 	}
 }

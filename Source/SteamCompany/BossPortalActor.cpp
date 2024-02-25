@@ -53,7 +53,7 @@ void ABossPortalActor::Tick(float DeltaTime)
 
 }
 
-void ABossPortalActor::OnInteractHandler()
+void ABossPortalActor::OnInteractHandler(ACharacter* InteractingPlayer)
 {
     // Mark off objective
     TArray<AActor*> OutActors;

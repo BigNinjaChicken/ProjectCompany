@@ -4,20 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "PlayerInteractableObjComponent.generated.h"
+#include "DifficultySystemComponent.generated.h"
 
-
-// Delegate declaration
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, ACharacter*, InteractingPlayer);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class STEAMCOMPANY_API UPlayerInteractableObjComponent : public UActorComponent
+class STEAMCOMPANY_API UDifficultySystemComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UPlayerInteractableObjComponent();
+	UDifficultySystemComponent();
 
 protected:
 	// Called when the game starts
@@ -27,6 +24,5 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UPROPERTY(BlueprintAssignable, Category = "Interaction")
-	FOnInteract OnInteract;
+		
 };

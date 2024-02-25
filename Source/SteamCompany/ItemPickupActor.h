@@ -41,5 +41,5 @@ public:
 	UCapsuleComponent* HitBoxCapsuleComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item")
-	TSubclassOf<UItemEffectComponent> ItemType;
+	TSubclassOf<UItemEffectComponent> ItemEffectType;
 };

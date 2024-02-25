@@ -53,7 +53,7 @@ void AItemPickupActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, 
     UItemStackComponent* ItemStackComponent = Cast<UItemStackComponent>(OtherActor->GetComponentByClass(UItemStackComponent::StaticClass()));
     if (ItemStackComponent)
     {
-        ItemStackComponent->AddItemEffect(ItemType);
+        ItemStackComponent->AddItemEffect(ItemEffectType);
     }
 
     Destroy();

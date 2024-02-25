@@ -1,0 +1,86 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "ActiveItemSystemComponent.h"
+#include "ActiveItemsUserWidget.h"
+#include "ActiveItemEffectComponent.h"
+#include "../../../../../../../Source/Runtime/UMG/Public/Components/GridPanel.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
+#include "ItemAbilityUserWidget.h"
+#include "../../../../../../../Source/Runtime/UMG/Public/Components/GridSlot.h"
+
+UActiveItemSystemComponent::UActiveItemSystemComponent()
+{
+	PrimaryComponentTick.bCanEverTick = true;
+
+}
+
+void UActiveItemSystemComponent::BeginPlay()
+{
+    Super::BeginPlay();
+
+    // Check if the Widget class is set in the Blueprint
+    if (!ActiveItemsWidgetClass)
+    {
+        return;
+    }
+
+	ActiveItemWidget = CreateWidget<UActiveItemsUserWidget>(GetWorld(), ActiveItemsWidgetClass);
+
+    if (!ActiveItemWidget)
+    {
+        return;
+    }
+
+    ActiveItemWidget->AddToViewport();
+}
+
+void UActiveItemSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+}
+
+void UActiveItemSystemComponent::AddItemEffect(TSubclassOf<UActiveItemEffectComponent> ItemType)
+{
+    ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+    if (!OwnerCharacter)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No Owning Actor"));
+        return;
+    }
+
+    FTransform ComponentTransform;
+	UActiveItemEffectComponent* ItemEffectComponent = Cast<UActiveItemEffectComponent>(OwnerCharacter->AddComponentByClass(ItemType, false, ComponentTransform, false));
+    if (!ItemEffectComponent) 
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ActiveItemEffectComponent null"));
+        return;
+    }
+
+    UGridPanel* ItemGridPanel = ActiveItemWidget->ItemGridPanel;
+    if (!ItemGridPanel) 
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ActiveItemEffectComponent null"));
+        return;
+    }
+
+    TArray<UActiveItemEffectComponent*> ActiveItemEffectComponents;
+    OwnerCharacter->GetComponents<UActiveItemEffectComponent>(ActiveItemEffectComponents);
+    int i = 0;
+    for (UActiveItemEffectComponent* ActiveItemEffectComponent : ActiveItemEffectComponents) 
+    {
+        UItemAbilityUserWidget* ItemAbilityUserWidget = CreateWidget<UItemAbilityUserWidget>(GetWorld(), ItemAbilityWidgetClass);
+        ItemAbilityUserWidget->NameText = FText::FromString(ItemEffectComponent->ItemName);
+        ItemAbilityUserWidget->ButtonText = FText::FromString(ItemEffectComponent->Button);
+
+        ActiveItemEffectComponent->ItemAbilityUserWidget = ItemAbilityUserWidget;
+
+        UGridSlot* GridSlot = Cast<UGridSlot>(ItemGridPanel->AddChild(ItemAbilityUserWidget));
+        GridSlot->SetRow(i / 4);
+        GridSlot->SetColumn(i % 4);
+        i++;
+    }
+
+    OnUpdateActiveCurrentItems.Broadcast(ItemEffectComponent);
+}

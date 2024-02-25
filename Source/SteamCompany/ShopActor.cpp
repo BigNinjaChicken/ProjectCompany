@@ -55,7 +55,7 @@ void AShopActor::Tick(float DeltaTime)
 // 
 // UE_LOG(LogTemp, Warning, TEXT("CombatComponent null"));
 // return;
-void AShopActor::OnInteractHandler()
+void AShopActor::OnInteractHandler(ACharacter* InteractingPlayer)
 {
     ULevelAdvancedFriendsGameInstance* AdvancedFriendsGameInstance = Cast<ULevelAdvancedFriendsGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
     TArray<AActor*> CharacterActors;
