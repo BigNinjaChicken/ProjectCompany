@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "SlamItemComponent.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Engine/TimerHandle.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Actor.h"
@@ -8,7 +9,6 @@
 #include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h"
 #include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
-#include "SlamItemComponent.h"
 
 void USlamItemComponent::BeginPlay()
 {
@@ -84,9 +84,11 @@ void USlamItemComponent::Attack()
 
 void USlamItemComponent::CheckGrounded()
 {
-    if (Character->GetCharacterMovement()->IsFalling()) {
+    if (Character->GetMovementComponent()->IsFalling()) {
         return;
     }
+
+    UE_LOG(LogTemp, Warning, TEXT("Here"));
 
     GetWorld()->GetTimerManager().ClearTimer(GroundedTimerHandle);
 

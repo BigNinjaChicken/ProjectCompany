@@ -44,4 +44,6 @@ public:
 
 	UPROPERTY()
 		UActiveItemsUserWidget* ActiveItemWidget;
+
+	int itemCount = 0;
 };

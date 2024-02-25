@@ -51,36 +51,30 @@ void UActiveItemSystemComponent::AddItemEffect(TSubclassOf<UActiveItemEffectComp
     }
 
     FTransform ComponentTransform;
-	UActiveItemEffectComponent* ItemEffectComponent = Cast<UActiveItemEffectComponent>(OwnerCharacter->AddComponentByClass(ItemType, false, ComponentTransform, false));
-    if (!ItemEffectComponent) 
+    UActiveItemEffectComponent* ItemEffectComponent = Cast<UActiveItemEffectComponent>(OwnerCharacter->AddComponentByClass(ItemType, false, ComponentTransform, false));
+    if (!ItemEffectComponent)
     {
         UE_LOG(LogTemp, Warning, TEXT("ActiveItemEffectComponent null"));
         return;
     }
 
     UGridPanel* ItemGridPanel = ActiveItemWidget->ItemGridPanel;
-    if (!ItemGridPanel) 
+    if (!ItemGridPanel)
     {
         UE_LOG(LogTemp, Warning, TEXT("ActiveItemEffectComponent null"));
         return;
     }
 
-    TArray<UActiveItemEffectComponent*> ActiveItemEffectComponents;
-    OwnerCharacter->GetComponents<UActiveItemEffectComponent>(ActiveItemEffectComponents);
-    int i = 0;
-    for (UActiveItemEffectComponent* ActiveItemEffectComponent : ActiveItemEffectComponents) 
-    {
-        UItemAbilityUserWidget* ItemAbilityUserWidget = CreateWidget<UItemAbilityUserWidget>(GetWorld(), ItemAbilityWidgetClass);
-        ItemAbilityUserWidget->NameText = FText::FromString(ItemEffectComponent->ItemName);
-        ItemAbilityUserWidget->ButtonText = FText::FromString(ItemEffectComponent->Button);
+    UItemAbilityUserWidget* ItemAbilityUserWidget = CreateWidget<UItemAbilityUserWidget>(GetWorld(), ItemAbilityWidgetClass);
+    ItemAbilityUserWidget->NameText = FText::FromString(ItemEffectComponent->ItemName);
+    ItemAbilityUserWidget->ButtonText = FText::FromString(ItemEffectComponent->Button);
 
-        ActiveItemEffectComponent->ItemAbilityUserWidget = ItemAbilityUserWidget;
+    ItemEffectComponent->ItemAbilityUserWidget = ItemAbilityUserWidget;
 
-        UGridSlot* GridSlot = Cast<UGridSlot>(ItemGridPanel->AddChild(ItemAbilityUserWidget));
-        GridSlot->SetRow(i / 4);
-        GridSlot->SetColumn(i % 4);
-        i++;
-    }
+    UGridSlot* GridSlot = Cast<UGridSlot>(ItemGridPanel->AddChild(ItemAbilityUserWidget));
+    GridSlot->SetRow(itemCount / 4);
+    GridSlot->SetColumn(itemCount % 4);
+    itemCount++;
 
     OnUpdateActiveCurrentItems.Broadcast(ItemEffectComponent);
 }
