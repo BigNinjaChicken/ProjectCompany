@@ -10,6 +10,7 @@
 #include "SlamItemComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSlamDamageComplete, UCombatComponent*, OtherCombatComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSlamComplete);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSlamCooldownBegin, float, BiteCooldown);
 
 class UInputMappingContext;
@@ -69,6 +70,9 @@ public:
 
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
         FOnSlamCooldownBegin OnCooldownBegin;
+
+     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
+    FOnSlamComplete OnSlamComplete;
 
     UPROPERTY()
         FTimerHandle GroundedTimerHandle;

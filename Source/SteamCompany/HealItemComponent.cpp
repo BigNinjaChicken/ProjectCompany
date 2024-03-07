@@ -12,6 +12,8 @@
 
 void UHealItemComponent::BeginPlay()
 {
+    Super::BeginPlay();
+
     // Attempt to find the CombatComponent on the same actor
     CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>();
     if (!CombatComp)
@@ -42,7 +44,7 @@ void UHealItemComponent::BeginPlay()
         if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
         {
             // Fire
-            EnhancedInputComponent->BindAction(HealAction, ETriggerEvent::Triggered, this, &UHealItemComponent::Attack);
+            EnhancedInputComponent->BindAction(HealAction, ETriggerEvent::Triggered, this, &UHealItemComponent::Heal);
         }
     }
 }
@@ -57,11 +59,11 @@ void UHealItemComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >&
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    DOREPLIFETIME(UHealItemComponent, OnDamageComplete);
+    DOREPLIFETIME(UHealItemComponent, OnHealItemComplete);
     DOREPLIFETIME(UHealItemComponent, OnCooldownBegin);
 }
 
-void UHealItemComponent::Attack()
+void UHealItemComponent::Heal()
 {
     if (bOnCooldown) {
         return;
@@ -72,8 +74,8 @@ void UHealItemComponent::Attack()
         return;
     }
 
-    Character->GetCharacterMovement()->AddImpulse(FVector::UpVector * JumpHeight);
-    GetWorld()->GetTimerManager().SetTimer(GroundedTimerHandle, this, &UHealItemComponent::CheckGrounded, 0.1f, true);
+    UCombatComponent* PlayerCombatComponent = Cast<UCombatComponent>(Character->GetComponentByClass(UCombatComponent::StaticClass()));
+    ServerRequestHeal(PlayerCombatComponent, HealAmount);
 
     OnCooldownBegin.Broadcast(CooldownTime);
     bOnCooldown = true;
@@ -82,65 +84,15 @@ void UHealItemComponent::Attack()
     ItemAbilityUserWidget->StartCooldown(CooldownTime);
 }
 
-void UHealItemComponent::CheckGrounded()
-{
-    if (Character->GetMovementComponent()->IsFalling()) {
-        return;
-    }
-
-    UE_LOG(LogTemp, Warning, TEXT("Here"));
-
-    GetWorld()->GetTimerManager().ClearTimer(GroundedTimerHandle);
-
-    FVector BiteLocation = Character->GetActorLocation();
-    float BiteRadius = 800.0f;
-
-    TArray<AActor*> OverlappedActors;
-    TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-    //     ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn)); // Overlap with other pawns
-
-    TArray<AActor*> ActorsToIgnore;
-    ActorsToIgnore.Add(Character); // Ignore self
-
-    bool bOverlap = UKismetSystemLibrary::SphereOverlapActors(
-        this,
-        BiteLocation,
-        BiteRadius,
-        ObjectTypes,
-        nullptr,
-        ActorsToIgnore,
-        OverlappedActors
-    );
-
-    /*Optional: Draw Debug Sphere for visual feedback*/
-#if WITH_EDITOR
-    DrawDebugSphere(GetWorld(), BiteLocation, BiteRadius, 32, FColor::Red, false, 2.0f);
-#endif
-
-    UCombatComponent* OtherCombatComp = nullptr;
-    if (bOverlap)
-    {
-        for (AActor* OtherActor : OverlappedActors)
-        {
-            OtherCombatComp = Cast<UCombatComponent>(OtherActor->GetComponentByClass(UCombatComponent::StaticClass()));
-            if (OtherCombatComp) {
-                ServerRequestDamage(OtherCombatComp, Damage * CombatComp->StrengthMultiplier);
-                CombatComp->EnterCombat();
-                OnDamageComplete.Broadcast(OtherCombatComp);
-            }
-        }
-    }
-}
-
 void UHealItemComponent::CooldownComplete()
 {
     bOnCooldown = false;
 }
 
-void UHealItemComponent::ServerRequestDamage_Implementation(UCombatComponent* OtherCombatComp, float DamageAmount)
+void UHealItemComponent::ServerRequestHeal_Implementation(UCombatComponent* PlayerCombatComp, float HealthIncrease)
 {
-    if (OtherCombatComp && OtherCombatComp->GetOwner()->HasAuthority())
+    if (CombatComp && CombatComp->GetOwner()->HasAuthority())
     {
-        OtherCombatComp->ServerTakeDamage(DamageAmount);
+        CombatComp->ServerHeal(HealthIncrease);
     }
 }

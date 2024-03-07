@@ -9,8 +9,8 @@
 
 #include "HealItemComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealDamageComplete, UCombatComponent*, OtherCombatComponent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealCooldownBegin, float, BiteCooldown);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealItemComplete, UCombatComponent*, OtherCombatComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealItemCooldownBegin, float, BiteCooldown);
 
 class UInputMappingContext;
 class UInputAction;
@@ -49,26 +49,23 @@ public:
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     UFUNCTION(BlueprintCallable)
-        void Attack();
-
-    UFUNCTION()
-        void CheckGrounded();
+        void Heal();
 
     UFUNCTION()
         void CooldownComplete();
 
     UFUNCTION(Server, Reliable)
-        void ServerRequestDamage(UCombatComponent* OtherCombatComp, float DamageAmount);
+        void ServerRequestHeal(UCombatComponent* PlayerCombatComp, float HealthIncrease);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
         float CooldownTime = 2.0f;
 
     // Delegate for damage events
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
-        FOnHealDamageComplete OnDamageComplete;
+        FOnHealItemComplete OnHealItemComplete;
 
     UPROPERTY(BlueprintAssignable, Replicated, Category = "Events")
-        FOnHealCooldownBegin OnCooldownBegin;
+        FOnHealItemCooldownBegin OnCooldownBegin;
 
     UPROPERTY()
         FTimerHandle GroundedTimerHandle;
@@ -76,8 +73,5 @@ public:
     bool bOnCooldown = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-        float Damage = 10.0f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-        float JumpHeight = 100.0f;
+        float HealAmount = 10.0f;
 };

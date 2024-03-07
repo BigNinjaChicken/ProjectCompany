@@ -12,6 +12,8 @@
 
 void USlamItemComponent::BeginPlay()
 {
+    Super::BeginPlay();
+
     // Attempt to find the CombatComponent on the same actor
     CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>();
     if (!CombatComp)
@@ -88,8 +90,6 @@ void USlamItemComponent::CheckGrounded()
         return;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("Here"));
-
     GetWorld()->GetTimerManager().ClearTimer(GroundedTimerHandle);
 
     FVector BiteLocation = Character->GetActorLocation();
@@ -130,6 +130,8 @@ void USlamItemComponent::CheckGrounded()
             }
         }
     }
+
+    OnSlamComplete.Broadcast();
 }
 
 void USlamItemComponent::CooldownComplete()
