@@ -18,21 +18,6 @@ UActiveItemSystemComponent::UActiveItemSystemComponent()
 void UActiveItemSystemComponent::BeginPlay()
 {
     Super::BeginPlay();
-
-    // Check if the Widget class is set in the Blueprint
-    if (!ActiveItemsWidgetClass)
-    {
-        return;
-    }
-
-	ActiveItemWidget = CreateWidget<UActiveItemsUserWidget>(GetWorld(), ActiveItemsWidgetClass);
-
-    if (!ActiveItemWidget)
-    {
-        return;
-    }
-
-    ActiveItemWidget->AddToViewport();
 }
 
 void UActiveItemSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -43,6 +28,11 @@ void UActiveItemSystemComponent::TickComponent(float DeltaTime, ELevelTick TickT
 
 void UActiveItemSystemComponent::AddItemEffect(TSubclassOf<UActiveItemEffectComponent> ItemType)
 {
+    if (!IsActive()) {
+        UE_LOG(LogTemp, Warning, TEXT("ActiveItemSystemComponent Is Not Active"));
+        return;
+    }
+
     ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
     if (!OwnerCharacter)
     {
@@ -77,4 +67,24 @@ void UActiveItemSystemComponent::AddItemEffect(TSubclassOf<UActiveItemEffectComp
     itemCount++;
 
     OnUpdateActiveCurrentItems.Broadcast(ItemEffectComponent);
+}
+
+void UActiveItemSystemComponent::Activate(bool bReset)
+{
+    Super::Activate();
+
+    // Check if the Widget class is set in the Blueprint
+    if (!ActiveItemsWidgetClass)
+    {
+        return;
+    }
+
+    ActiveItemWidget = CreateWidget<UActiveItemsUserWidget>(GetWorld(), ActiveItemsWidgetClass);
+
+    if (!ActiveItemWidget)
+    {
+        return;
+    }
+
+    ActiveItemWidget->AddToViewport();
 }

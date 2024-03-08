@@ -46,4 +46,6 @@ public:
 		UActiveItemsUserWidget* ActiveItemWidget;
 
 	int itemCount = 0;
+
+	virtual void Activate(bool bReset);
 };
