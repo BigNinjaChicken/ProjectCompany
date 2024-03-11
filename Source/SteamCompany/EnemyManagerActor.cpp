@@ -6,6 +6,7 @@
 #include "GenerateLevelActor.h"
 #include "../../../../../../../Source/Runtime/NavigationSystem/Public/NavigationSystem.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/CapsuleComponent.h"
+#include "LevelAdvancedFriendsGameInstance.h"
 
 // Sets default values
 AEnemyManagerActor::AEnemyManagerActor()
@@ -26,11 +27,22 @@ void AEnemyManagerActor::BeginPlay()
     if (GenerateLevelActor) {
         GenerateLevelActor->OnLevelGenerateComplete.AddDynamic(this, &AEnemyManagerActor::BeginSpawning);
     }
+
+    GetWorldTimerManager().SetTimer(UpdateGameTimerHandle, this, &AEnemyManagerActor::UpdateGameTimer, 0.1f, true);
+
+    ULevelAdvancedFriendsGameInstance* LevelAdvancedFriendsGameInstance = Cast<ULevelAdvancedFriendsGameInstance>(GetWorld()->GetGameInstance());
+    CurrentGameTime = LevelAdvancedFriendsGameInstance->CurrentGameTime;
 }
 
 void AEnemyManagerActor::BeginSpawning() 
 {
     GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AEnemyManagerActor::SpawnEnemies, SpawnInterval, true);
+}
+
+void AEnemyManagerActor::UpdateGameTimer() 
+{
+    CurrentGameTime += 0.1f;
+    OnGameTimeUpdate.Broadcast(CurrentGameTime);
 }
 
 // Called every frame

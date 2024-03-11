@@ -1,16 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "DifficultySystemComponent.h"
+#include "DifficultyWidget.h"
+#include "EnemyManagerActor.h"
+#include "LevelAdvancedFriendsGameInstance.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "../../../../../../../Source/Runtime/Core/Public/Containers/UnrealString.h"
 
-// Sets default values for this component's properties
 UDifficultySystemComponent::UDifficultySystemComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
+	bAutoActivate = 1;
 }
 
 
@@ -19,16 +20,33 @@ void UDifficultySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	DifficultyWidget = CreateWidget<UDifficultyWidget>(GetWorld(), DifficultyWidgetClass);
+	if (!DifficultyWidget) {
+		UE_LOG(LogTemp, Warning, TEXT("DifficultyWidget null"));
+	}
+
+	ULevelAdvancedFriendsGameInstance* LevelAdvancedFriendsGameInstance = GetWorld()->GetGameInstance<ULevelAdvancedFriendsGameInstance>();
+	DifficultyWidget->World = LevelAdvancedFriendsGameInstance->CurrentLevel;
+	DifficultyWidget->AddToViewport();
+
+	DifficultyWidget->SetDifficulty(((int)LevelAdvancedFriendsGameInstance->CurrentGameTime) / DifficultyTextInterval);
+
+	AEnemyManagerActor* EnemyManagerActor = Cast<AEnemyManagerActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyManagerActor::StaticClass()));
+	if (EnemyManagerActor) {
+		EnemyManagerActor->OnGameTimeUpdate.AddDynamic(this, &UDifficultySystemComponent::GameTimeUpdate);
+	}
 }
 
+void UDifficultySystemComponent::GameTimeUpdate(float NewTime) {
+	// Calculate minutes and seconds from NewTime
+	int Minutes = (int)NewTime / 60;
+	int Seconds = (int)NewTime % 60;
+	FString GameTimeString = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+	DifficultyWidget->GameTime = FText::FromString(GameTimeString);
 
-// Called every frame
-void UDifficultySystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	// Update Difficulty
+	if (((int)NewTime) / DifficultyTextInterval > CurrentDifficulty - 1) {
+		CurrentDifficulty++;
+		DifficultyWidget->SetDifficulty(((int)NewTime) / DifficultyTextInterval);
+	}
 }
-

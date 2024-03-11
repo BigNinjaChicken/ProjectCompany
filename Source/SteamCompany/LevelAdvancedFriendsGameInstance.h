@@ -37,6 +37,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	int32 CurrentLevel = 1;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+    float CurrentGameTime = 0.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TMap<FString, FItemEffectComponentArray> PlayerItemsMap;
 };

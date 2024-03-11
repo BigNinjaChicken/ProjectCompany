@@ -15,6 +15,7 @@
 #include "Starter/SteamCompanyPlayerController.h"
 #include "../Classes/AdvancedSessionsLibrary.h"
 #include "ObjectiveSystemComponent.h"
+#include "EnemyManagerActor.h"
 
 // Sets default values
 ABossPortalActor::ABossPortalActor()
@@ -70,6 +71,12 @@ void ABossPortalActor::OnInteractHandler(ACharacter* InteractingPlayer)
         }
     }
 
+    // Update Level Instance with enemy managers current timer
+    ULevelAdvancedFriendsGameInstance* LevelAdvancedFriendsGameInstance = Cast<ULevelAdvancedFriendsGameInstance>(GetWorld()->GetGameInstance());
+    AEnemyManagerActor* EnemyManagerActor = Cast<AEnemyManagerActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyManagerActor::StaticClass()));
+    LevelAdvancedFriendsGameInstance->CurrentGameTime = EnemyManagerActor->CurrentGameTime;
+
+    // Open New Level
     FString InUrl = "/Game/Frazier/Creative/LV_Lair?listen";
     UAdvancedSessionsLibrary::ServerTravel(GetWorld(), InUrl, false, false);
     Destroy();

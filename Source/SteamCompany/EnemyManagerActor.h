@@ -7,6 +7,8 @@
 #include "EnemySpawnNodeActor.h"
 #include "EnemyManagerActor.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTimeUpdate, float, CurrentGameTime);
+
 class AEnemySpawnNodeActor;
 class ACharacter;
 
@@ -14,8 +16,8 @@ UCLASS()
 class STEAMCOMPANY_API AEnemyManagerActor : public AActor
 {
     GENERATED_BODY()
-    
-public:    
+
+public:
     // Sets default values for this actor's properties
     AEnemyManagerActor();
 
@@ -24,38 +26,48 @@ protected:
     virtual void BeginPlay() override;
 
     UFUNCTION()
-    void BeginSpawning();
+        void BeginSpawning();
+    void UpdateGameTimer();
 public:
     // Called every frame
     virtual void Tick(float DeltaTime) override;
 
     UPROPERTY()
-    FTimerHandle SpawnTimerHandle;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-    int32 EnemiesPerPlayer = 3;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-    int32 CurrentLevel = 0;
+        FTimerHandle SpawnTimerHandle;
 
     UPROPERTY()
-    int32 WaveCount;
-
-//     UPROPERTY()
-//     TArray<AEnemySpawnNodeActor*> EnemySpawnNodeActors;
+        FTimerHandle UpdateGameTimerHandle;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-    TSubclassOf<ACharacter> EnemyCharacter;
+        int32 EnemiesPerPlayer = 3;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-    float SpawnInterval = 15.0f;
+        int32 CurrentLevel = 0;
+
+    UPROPERTY()
+        int32 WaveCount;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnGameTimeUpdate OnGameTimeUpdate;
+
+    //     UPROPERTY()
+    //     TArray<AEnemySpawnNodeActor*> EnemySpawnNodeActors;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+        TSubclassOf<ACharacter> EnemyCharacter;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+        float SpawnInterval = 15.0f;
 
     UFUNCTION()
-    void SpawnEnemies();
+        void SpawnEnemies();
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-    int EnemySpawnRateWaveIncrement = 3;
+        int EnemySpawnRateWaveIncrement = 3;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-    int EnemyIncreaseAmount = 1;
+        int EnemyIncreaseAmount = 1;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+        float CurrentGameTime = 0.0f;
 };
