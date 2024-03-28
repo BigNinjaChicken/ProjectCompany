@@ -21,6 +21,10 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	virtual void Activate(bool bReset);
+
+	virtual void Deactivate();
+
 	UFUNCTION()
 	void GameTimeUpdate(float NewTime);
 public:

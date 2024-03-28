@@ -53,7 +53,12 @@ Plugins/*/Binaries/*
 Build/*
 PackagedGame/*
 
+# Example Maps
 Content/Gussy/ModularGothicFantasyEnvironment/Maps/*
+Content/FantasyBundle/Maps/Demonstration_Castle.umap
+Content/FantasyBundle/*
+Content/FantasyInterior01/*
+
 
 # Whitelist PakBlacklist-<BuildConfiguration>.txt files
 !Build/*/

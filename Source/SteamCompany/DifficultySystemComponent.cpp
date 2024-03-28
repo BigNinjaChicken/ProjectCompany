@@ -23,11 +23,18 @@ void UDifficultySystemComponent::BeginPlay()
 	DifficultyWidget = CreateWidget<UDifficultyWidget>(GetWorld(), DifficultyWidgetClass);
 	if (!DifficultyWidget) {
 		UE_LOG(LogTemp, Warning, TEXT("DifficultyWidget null"));
+		return;
 	}
 
+	if (IsActive()) DifficultyWidget->AddToViewport();
+
 	ULevelAdvancedFriendsGameInstance* LevelAdvancedFriendsGameInstance = GetWorld()->GetGameInstance<ULevelAdvancedFriendsGameInstance>();
+	if (!LevelAdvancedFriendsGameInstance) {
+		UE_LOG(LogTemp, Warning, TEXT("LevelAdvancedFriendsGameInstance null"));
+		return;
+	}
+
 	DifficultyWidget->World = LevelAdvancedFriendsGameInstance->CurrentLevel;
-	DifficultyWidget->AddToViewport();
 
 	DifficultyWidget->SetDifficulty(((int)LevelAdvancedFriendsGameInstance->CurrentGameTime) / DifficultyTextInterval);
 
@@ -35,6 +42,16 @@ void UDifficultySystemComponent::BeginPlay()
 	if (EnemyManagerActor) {
 		EnemyManagerActor->OnGameTimeUpdate.AddDynamic(this, &UDifficultySystemComponent::GameTimeUpdate);
 	}
+}
+
+void UDifficultySystemComponent::Activate(bool bReset)
+{
+	Super::Activate();
+}
+
+void UDifficultySystemComponent::Deactivate()
+{
+	Super::Deactivate();
 }
 
 void UDifficultySystemComponent::GameTimeUpdate(float NewTime) {
