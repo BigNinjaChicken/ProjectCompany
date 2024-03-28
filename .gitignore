@@ -57,8 +57,8 @@ PackagedGame/*
 Content/Gussy/ModularGothicFantasyEnvironment/Maps/*
 Content/FantasyBundle/Maps/Demonstration_Castle.umap
 Content/FantasyBundle/*
-Content/FantasyInterior01/*
-
+Content/FantasyInterior01/Materials/*
+Content/FantasyInterior01/Textures/*
 
 # Whitelist PakBlacklist-<BuildConfiguration>.txt files
 !Build/*/
